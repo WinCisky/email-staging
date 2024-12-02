@@ -2,8 +2,13 @@
     import { base } from '$app/paths';
     import { onMount } from 'svelte';
 
+    const endpoint = "http://localhost:3000";
+
     let isMobileMenuOpen = false;
     let isUserMenuOpen = false;
+    let emails = new Map<number, any>();
+    let page = 1;
+    let selectedEmailId: number | null = null;
 
     function toggleMobileMenu() {
         isMobileMenuOpen = !isMobileMenuOpen;
@@ -18,10 +23,17 @@
         window.location.href = `${base}/`;
     }
 
-    onMount(() => {
+    onMount(async () => {
         const user = localStorage.getItem('user');
         if (!user) {
             window.location.href = `${base}/`;
+        } else {
+            const decodedUser = JSON.parse(user);
+            const response = await fetch(`${endpoint}/emails?username=${decodedUser.username}&password=${decodedUser.password}&page=${page}`);
+            if (response.ok) {
+                const data = await response.json();
+                emails = new Map(data.map((email: any) => [email.id, email]));
+            }
         }
     });
 </script>
@@ -120,121 +132,6 @@
                                     Dashboard
                                 </a>
                             </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
-                                >
-                                    <svg
-                                        class="h-6 w-6 shrink-0"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        aria-hidden="true"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-                                        />
-                                    </svg>
-                                    Team
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
-                                >
-                                    <svg
-                                        class="h-6 w-6 shrink-0"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        aria-hidden="true"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"
-                                        />
-                                    </svg>
-                                    Projects
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
-                                >
-                                    <svg
-                                        class="h-6 w-6 shrink-0"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        aria-hidden="true"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-                                        />
-                                    </svg>
-                                    Calendar
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
-                                >
-                                    <svg
-                                        class="h-6 w-6 shrink-0"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        aria-hidden="true"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"
-                                        />
-                                    </svg>
-                                    Documents
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
-                                >
-                                    <svg
-                                        class="h-6 w-6 shrink-0"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        aria-hidden="true"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"
-                                        />
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
-                                        />
-                                    </svg>
-                                    Reports
-                                </a>
-                            </li>
                         </ul>
                     </nav>
                 </div>
@@ -276,121 +173,6 @@
                             />
                         </svg>
                         <span class="sr-only">Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="#"
-                        class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold"
-                    >
-                        <svg
-                            class="h-6 w-6 shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-                            />
-                        </svg>
-                        <span class="sr-only">Team</span>
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="#"
-                        class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold"
-                    >
-                        <svg
-                            class="h-6 w-6 shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"
-                            />
-                        </svg>
-                        <span class="sr-only">Projects</span>
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="#"
-                        class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold"
-                    >
-                        <svg
-                            class="h-6 w-6 shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-                            />
-                        </svg>
-                        <span class="sr-only">Calendar</span>
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="#"
-                        class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold"
-                    >
-                        <svg
-                            class="h-6 w-6 shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"
-                            />
-                        </svg>
-                        <span class="sr-only">Documents</span>
-                    </a>
-                </li>
-                <li>
-                    <a
-                        href="#"
-                        class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-3 text-sm leading-6 font-semibold"
-                    >
-                        <svg
-                            class="h-6 w-6 shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"
-                            />
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"
-                            />
-                        </svg>
-                        <span class="sr-only">Reports</span>
                     </a>
                 </li>
             </ul>
@@ -552,18 +334,40 @@
             </div>
         </div>
 
-        <main class="xl:pl-96">
+        <main class="pl-96">
             <div class="px-4 py-10 sm:px-6 lg:px-8 lg:py-6">
                 <!-- Main area -->
-                 MAIN AREA
+                {#if selectedEmailId !== null}
+                    <div class="flex flex-col gap-y-4">
+                        <div class="bg-white rounded-lg shadow-sm p-6">
+                            <h2 class="text-lg font-semibold text-gray-900">{emails.get(selectedEmailId).subject}</h2>
+                            <p class="text-sm text-gray-500">{emails.get(selectedEmailId).content}</p>
+                        </div>
+                    </div>
+                {/if}
             </div>
         </main>
     </div>
 
     <aside
-        class="fixed bottom-0 left-20 top-16 hidden w-96 overflow-y-auto border-r border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block"
+        class="fixed bottom-0 left-20 top-16 xxl:hidden w-96 overflow-y-auto border-r border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block"
     >
         <!-- Secondary column (hidden on smaller screens) -->
-         SECONDARY COLUMN
+        <div class="flex flex-col gap-y-4">
+            <ul role="list" class="flex flex-col gap-y-2">
+                {#each Array.from(emails.values()) as email}
+                    <li>
+                        <a
+                            href="#"
+                            on:click={() => selectedEmailId = email.id}
+                            class="block p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50"
+                        >
+                            {email.subject}
+                        </a>
+                    </li>
+                {/each}
+            </ul>
+        </div>
+        
     </aside>
 </div>
