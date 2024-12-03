@@ -1,14 +1,15 @@
 <script lang="ts">
-    import { base } from '$app/paths';
-    import { onMount } from 'svelte';
+    import { base } from "$app/paths";
+    import { onMount } from "svelte";
 
     const endpoint = "http://localhost:3000";
 
-    let isMobileMenuOpen = false;
-    let isUserMenuOpen = false;
-    let emails = new Map<number, any>();
-    let page = 1;
-    let selectedEmailId: number | null = null;
+    let isMobileMenuOpen = $state(false);
+    let isUserMenuOpen = $state(false);
+    let emails = $state(new Map<number, any>());
+    let page = $state(1);
+    let selectedEmailId: number | null = $state(null);
+    let selectedEmailContent: string | null = $state(null);
 
     function toggleMobileMenu() {
         isMobileMenuOpen = !isMobileMenuOpen;
@@ -19,17 +20,88 @@
     }
 
     function signOut() {
-        localStorage.removeItem('user');
+        localStorage.removeItem("user");
         window.location.href = `${base}/`;
     }
 
+    function parseEmail(emailContent: string) {
+        // Dividi l'email in intestazioni e corpo
+        const [headers, ...bodyParts] = emailContent.split("\r\n\r\n");
+        const body = bodyParts.join("\r\n\r\n");
+
+        // Dividi le intestazioni in singole righe
+        const headerLines = headers.split("\r\n");
+        const headerMap: any = {};
+
+        // Crea una mappa delle intestazioni
+        headerLines.forEach((line) => {
+            const [key, value] = line.split(": ");
+            headerMap[key] = value;
+        });
+
+        return {
+            headers: headerMap,
+            body: body,
+        };
+    }
+
+    function formatDate(dateString: string): string {
+        console.log(dateString);
+        const locale = "it-IT";
+        const timeZone = "Europe/Rome";
+
+        const date = new Date(dateString);
+        const today = new Date();
+
+        // Check if the date is today
+        const isToday = date.getDate() === today.getDate() &&
+                        date.getMonth() === today.getMonth() &&
+                        date.getFullYear() === today.getFullYear();
+
+        if (isToday) {
+            const timeFormatter = new Intl.DateTimeFormat(locale, {
+                hour: "numeric",
+                minute: "numeric",
+                timeZone,
+            });
+            return timeFormatter.format(date);
+        } else {
+            const dateFormatter = new Intl.DateTimeFormat(locale, {
+                year: "numeric",
+                month: "numeric",
+                day: "numeric",
+                timeZone,
+            });
+            return dateFormatter.format(date);
+
+        }
+    }
+
+    $effect(() => {
+        if (selectedEmailId !== null) {
+            const email = emails.get(selectedEmailId);
+            if (email) {
+                selectedEmailContent = parseEmail(email.content).body ?? null;
+            } else {
+                selectedEmailContent = null;
+            }
+        } else {
+            selectedEmailContent = null;
+        }
+    });
+
     onMount(async () => {
-        const user = localStorage.getItem('user');
+        const user = localStorage.getItem("user");
         if (!user) {
             window.location.href = `${base}/`;
         } else {
-            const decodedUser = JSON.parse(user);
-            const response = await fetch(`${endpoint}/emails?username=${decodedUser.username}&password=${decodedUser.password}&page=${page}`);
+            // const data = [{"id":1,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <226dcc5b-4d8a-6f44-7c45-266fc3e9f5a8@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:01 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-1e24ea08a4e0b6fe-Part_1\"\r\n\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-1e24ea08a4e0b6fe-Part_1--\r\n","timestamp":"2024-12-03 11:39:02"},{"id":2,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <842e18e7-0e8e-b526-9f46-1126b13cf46a@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:05 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-c758aa0442799687-Part_1\"\r\n\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-c758aa0442799687-Part_1--\r\n","timestamp":"2024-12-03 11:39:05"},{"id":3,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <4b244f2f-df0a-ed4d-5c7d-efad5782b022@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:06 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-7e0f1c14217829ca-Part_1\"\r\n\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-7e0f1c14217829ca-Part_1--\r\n","timestamp":"2024-12-03 11:39:06"}];
+            // emails = new Map(data.map((email: any) => [email.id, email]));
+            // return;
+            const decodedUser = JSON.parse(user!);
+            const response = await fetch(
+                `${endpoint}/emails?username=${decodedUser.username}&password=${decodedUser.password}&page=${page}`,
+            );
             if (response.ok) {
                 const data = await response.json();
                 emails = new Map(data.map((email: any) => [email.id, email]));
@@ -40,10 +112,15 @@
 
 <div>
     <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
-    <div class="relative z-50 lg:hidden" role="dialog" aria-modal="true" class:hidden={!isMobileMenuOpen}>
+    <div
+        class="relative z-50 lg:hidden"
+        role="dialog"
+        aria-modal="true"
+        class:hidden={!isMobileMenuOpen}
+    >
         <!--
         Off-canvas menu backdrop, show/hide based on off-canvas menu state.
-  
+
         Entering: "transition-opacity ease-linear duration-300"
           From: "opacity-0"
           To: "opacity-100"
@@ -56,7 +133,7 @@
         <div class="fixed inset-0 flex">
             <!--
           Off-canvas menu, show/hide based on off-canvas menu state.
-  
+
           Entering: "transition ease-in-out duration-300 transform"
             From: "-translate-x-full"
             To: "translate-x-0"
@@ -67,7 +144,7 @@
             <div class="relative mr-16 flex w-full max-w-xs flex-1">
                 <!--
             Close button, show/hide based on off-canvas menu state.
-  
+
             Entering: "ease-in-out duration-300"
               From: "opacity-0"
               To: "opacity-100"
@@ -78,7 +155,11 @@
                 <div
                     class="absolute left-full top-0 flex w-16 justify-center pt-5"
                 >
-                    <button type="button" class="-m-2.5 p-2.5" on:click={toggleMobileMenu}>
+                    <button
+                        type="button"
+                        class="-m-2.5 p-2.5"
+                        onclick={toggleMobileMenu}
+                    >
                         <span class="sr-only">Close sidebar</span>
                         <svg
                             class="h-6 w-6 text-white"
@@ -183,7 +264,11 @@
         <div
             class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8"
         >
-            <button type="button" class="-m-2.5 p-2.5 text-gray-700 lg:hidden" on:click={toggleMobileMenu}>
+            <button
+                type="button"
+                class="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+                onclick={toggleMobileMenu}
+            >
                 <span class="sr-only">Open sidebar</span>
                 <svg
                     class="h-6 w-6"
@@ -266,7 +351,7 @@
                             id="user-menu-button"
                             aria-expanded="false"
                             aria-haspopup="true"
-                            on:click={toggleUserMenu}
+                            onclick={toggleUserMenu}
                         >
                             <span class="sr-only">Open user menu</span>
                             <img
@@ -296,7 +381,7 @@
 
                         <!--
                 Dropdown menu, show/hide based on menu state.
-  
+
                 Entering: "transition ease-out duration-100"
                   From: "transform opacity-0 scale-95"
                   To: "transform opacity-100 scale-100"
@@ -322,7 +407,7 @@
                             > -->
                             <a
                                 href="#"
-                                on:click={signOut}
+                                onclick={signOut}
                                 class="block px-3 py-1 text-sm leading-6 text-gray-900"
                                 role="menuitem"
                                 tabindex="-1"
@@ -340,8 +425,12 @@
                 {#if selectedEmailId !== null}
                     <div class="flex flex-col gap-y-4">
                         <div class="bg-white rounded-lg shadow-sm p-6">
-                            <h2 class="text-lg font-semibold text-gray-900">{emails.get(selectedEmailId).subject}</h2>
-                            <p class="text-sm text-gray-500">{emails.get(selectedEmailId).content}</p>
+                            <h2 class="text-lg font-semibold text-gray-900">
+                                {emails.get(selectedEmailId).subject}
+                            </h2>
+                            <p class="text-sm text-gray-500">
+                                {selectedEmailContent}
+                            </p>
                         </div>
                     </div>
                 {/if}
@@ -354,20 +443,23 @@
     >
         <!-- Secondary column (hidden on smaller screens) -->
         <div class="flex flex-col gap-y-4">
-            <ul role="list" class="flex flex-col gap-y-2">
+            <ul role="list" class="divide-y divide-gray-100">
                 {#each Array.from(emails.values()) as email}
-                    <li>
-                        <a
-                            href="#"
-                            on:click={() => selectedEmailId = email.id}
-                            class="block p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50"
-                        >
-                            {email.subject}
-                        </a>
-                    </li>
+                <li class="flex justify-between gap-x-6 py-5">
+                  <button class="flex min-w-0 gap-x-4 cursor-pointer" onclick={() => selectedEmailId = email.id}>
+                    <div class="flex flex-col items-center">
+                        <img class="size-12 flex-none rounded-full bg-gray-50" src="https://ui-avatars.com/api/?name={email.sender}" alt="">
+                        <p class="mt-1 text-wrap text-xs/5 text-gray-900">{formatDate(email.timestamp)}</p>
+                    </div>
+                    <div class="min-w-0 flex-auto flex flex-col items-start">
+                      <p class="text-sm/6 font-semibold text-gray-900">{email.subject}</p>
+                      <p class="mt-1 text-wrap text-xs/5 text-gray-500">from: {email.sender}</p>
+                      <p class="mt-1 text-wrap text-xs/5 text-gray-500">to: {email.recipients.split(",")}</p>
+                    </div>
+                </button>
+                </li>
                 {/each}
             </ul>
         </div>
-        
     </aside>
 </div>
