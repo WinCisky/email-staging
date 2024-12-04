@@ -11,6 +11,7 @@
     let page = $state(1);
     let selectedEmailId: number | null = $state(null);
     let selectedEmailContent: string | null = $state(null);
+    let selectedPreviewLayout: 'desktop' | 'tablet' | 'mobile' = 'desktop';
 
     function toggleMobileMenu() {
         isMobileMenuOpen = !isMobileMenuOpen;
@@ -71,9 +72,10 @@
         const today = new Date();
 
         // Check if the date is today
-        const isToday = date.getDate() === today.getDate() &&
-                        date.getMonth() === today.getMonth() &&
-                        date.getFullYear() === today.getFullYear();
+        const isToday =
+            date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear();
 
         if (isToday) {
             const timeFormatter = new Intl.DateTimeFormat(locale, {
@@ -90,7 +92,6 @@
                 timeZone,
             });
             return dateFormatter.format(date);
-
         }
     }
 
@@ -112,7 +113,41 @@
         if (!user) {
             window.location.href = `${base}/`;
         } else {
-            const data = [{"id":1,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <226dcc5b-4d8a-6f44-7c45-266fc3e9f5a8@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:01 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-1e24ea08a4e0b6fe-Part_1\"\r\n\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-1e24ea08a4e0b6fe-Part_1--\r\n","timestamp":"2024-12-03 11:39:02"},{"id":2,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <842e18e7-0e8e-b526-9f46-1126b13cf46a@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:05 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-c758aa0442799687-Part_1\"\r\n\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-c758aa0442799687-Part_1--\r\n","timestamp":"2024-12-03 11:39:05"},{"id":3,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <4b244f2f-df0a-ed4d-5c7d-efad5782b022@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:06 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-7e0f1c14217829ca-Part_1\"\r\n\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-7e0f1c14217829ca-Part_1--\r\n","timestamp":"2024-12-03 11:39:06"}];
+            const data = [
+                {
+                    id: 1,
+                    username: "your_username1",
+                    password: "your_password2",
+                    sender: "sender@example.com",
+                    recipients: "recipient@example.com",
+                    subject: "Hello",
+                    content:
+                        'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <226dcc5b-4d8a-6f44-7c45-266fc3e9f5a8@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:01 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-1e24ea08a4e0b6fe-Part_1"\r\n\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-1e24ea08a4e0b6fe-Part_1--\r\n',
+                    timestamp: "2024-12-03 11:39:02",
+                },
+                {
+                    id: 2,
+                    username: "your_username1",
+                    password: "your_password2",
+                    sender: "sender@example.com",
+                    recipients: "recipient@example.com",
+                    subject: "Hello",
+                    content:
+                        'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <842e18e7-0e8e-b526-9f46-1126b13cf46a@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:05 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-c758aa0442799687-Part_1"\r\n\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-c758aa0442799687-Part_1--\r\n',
+                    timestamp: "2024-12-03 11:39:05",
+                },
+                {
+                    id: 3,
+                    username: "your_username1",
+                    password: "your_password2",
+                    sender: "sender@example.com",
+                    recipients: "recipient@example.com",
+                    subject: "Hello",
+                    content:
+                        'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <4b244f2f-df0a-ed4d-5c7d-efad5782b022@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:06 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-7e0f1c14217829ca-Part_1"\r\n\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-7e0f1c14217829ca-Part_1--\r\n',
+                    timestamp: "2024-12-03 11:39:06",
+                },
+            ];
             emails = new Map(data.map((email: any) => [email.id, email]));
             return;
             const decodedUser = JSON.parse(user!);
@@ -451,32 +486,65 @@
                         </div>
                     </div> -->
                     <div class="border-b border-gray-200 pb-5">
-                        <div class="sm:flex sm:items-baseline sm:justify-between">
-                          <div class="sm:w-0 sm:flex-1">
-                            <h1 id="message-heading" class="text-base font-semibold leading-6 text-gray-900">
-                                {emails.get(selectedEmailId).subject}
-                            </h1>
-                            <p class="mt-1 truncate text-sm text-gray-500">
-                                From: {emails.get(selectedEmailId).sender}
-                            </p>
-                            <p class="mt-1 truncate text-sm text-gray-500">
-                                To: {emails.get(selectedEmailId).recipients.split(",")}
-                            </p>
-                          </div>
+                        <div
+                            class="sm:flex sm:items-baseline sm:justify-between"
+                        >
+                            <div class="sm:w-0 sm:flex-1">
+                                <h1
+                                    id="message-heading"
+                                    class="text-base font-semibold leading-6 text-gray-900"
+                                >
+                                    {emails.get(selectedEmailId).subject}
+                                </h1>
+                                <p class="mt-1 truncate text-sm text-gray-500">
+                                    From: {emails.get(selectedEmailId).sender}
+                                </p>
+                                <p class="mt-1 truncate text-sm text-gray-500">
+                                    To: {emails
+                                        .get(selectedEmailId)
+                                        .recipients.split(",")}
+                                </p>
+                            </div>
 
-                          <div class="mt-4 flex items-center justify-between sm:ml-6 sm:mt-0 sm:flex-shrink-0 sm:justify-start">
-                            <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">{formatDate(emails.get(selectedEmailId).timestamp, true)}</span>
-                            <div class="relative ml-3 inline-block text-left">
-                              <div>
-                                <button type="button" class="-my-2 flex items-center rounded-full bg-white p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="menu-0-button" aria-expanded="false" aria-haspopup="true" onclick={toggleSelectedEmailMenu}>
-                                  <span class="sr-only">Open options</span>
-                                  <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                    <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
-                                  </svg>
-                                </button>
-                              </div>
+                            <div
+                                class="mt-4 flex items-center justify-between sm:ml-6 sm:mt-0 sm:flex-shrink-0 sm:justify-start"
+                            >
+                                <span
+                                    class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20"
+                                    >{formatDate(
+                                        emails.get(selectedEmailId).timestamp,
+                                        true,
+                                    )}</span
+                                >
+                                <div
+                                    class="relative ml-3 inline-block text-left"
+                                >
+                                    <div>
+                                        <button
+                                            type="button"
+                                            class="-my-2 flex items-center rounded-full bg-white p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            id="menu-0-button"
+                                            aria-expanded="false"
+                                            aria-haspopup="true"
+                                            onclick={toggleSelectedEmailMenu}
+                                        >
+                                            <span class="sr-only"
+                                                >Open options</span
+                                            >
+                                            <svg
+                                                class="h-5 w-5"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                                aria-hidden="true"
+                                            >
+                                                <path
+                                                    d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </div>
 
-                              <!--
+                                    <!--
                                 Dropdown menu, show/hide based on menu state.
 
                                 Entering: "transition ease-out duration-100"
@@ -486,25 +554,171 @@
                                   From: "transform opacity-100 scale-100"
                                   To: "transform opacity-0 scale-95"
                               -->
-                              <div class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-0-button" tabindex="-1" class:hidden={!isSelectedEmailMenuOpen}>
-                                <div class="py-1" role="none">
-                                  <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-                                  <a href="#" class="text-gray-700 flex justify-between px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-0-item-0">
-                                    <span>Edit</span>
-                                  </a>
-                                  <a href="#" class="text-gray-700 flex justify-between px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-0-item-1">
-                                    <span>Duplicate</span>
-                                  </a>
-                                  <button type="button" class="text-gray-700 flex w-full justify-between px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-0-item-2">
-                                    <span>Archive</span>
-                                  </button>
+                                    <div
+                                        class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                        role="menu"
+                                        aria-orientation="vertical"
+                                        aria-labelledby="menu-0-button"
+                                        tabindex="-1"
+                                        class:hidden={!isSelectedEmailMenuOpen}
+                                    >
+                                        <div class="py-1" role="none">
+                                            <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+                                            <a
+                                                href="#"
+                                                class="text-gray-700 flex justify-between px-4 py-2 text-sm"
+                                                role="menuitem"
+                                                tabindex="-1"
+                                                id="menu-0-item-0"
+                                            >
+                                                <span>Edit</span>
+                                            </a>
+                                            <a
+                                                href="#"
+                                                class="text-gray-700 flex justify-between px-4 py-2 text-sm"
+                                                role="menuitem"
+                                                tabindex="-1"
+                                                id="menu-0-item-1"
+                                            >
+                                                <span>Duplicate</span>
+                                            </a>
+                                            <button
+                                                type="button"
+                                                class="text-gray-700 flex w-full justify-between px-4 py-2 text-sm"
+                                                role="menuitem"
+                                                tabindex="-1"
+                                                id="menu-0-item-2"
+                                            >
+                                                <span>Archive</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                              </div>
                             </div>
-                          </div>
                         </div>
-                      </div>
-
+                    </div>
+                    <div>
+                        <div class="sm:hidden">
+                            <label for="tabs" class="sr-only"
+                                >Select a tab</label
+                            >
+                            <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
+                            <select
+                                id="tabs"
+                                name="tabs"
+                                class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                                <option>My Account</option>
+                                <option>Company</option>
+                                <option selected>Team Members</option>
+                                <option>Billing</option>
+                            </select>
+                        </div>
+                        <div class="hidden sm:block">
+                            <div class="border-b border-gray-200">
+                                <nav
+                                    class="-mb-px flex space-x-8"
+                                    aria-label="Tabs"
+                                >
+                                    <!-- Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
+                                    <a
+                                        href="#"
+                                        class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
+                                    >
+                                        <!-- Current: "text-indigo-500", Default: "text-gray-400 group-hover:text-gray-500" -->
+                                        <!-- <svg
+                                            class="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-5 w-5"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z"
+                                            />
+                                        </svg> -->
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-5 w-5"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25"
+                                            />
+                                        </svg>
+                                        <span>Desktop</span>
+                                    </a>
+                                    <a
+                                        href="#"
+                                        class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
+                                    >
+                                        <!-- <svg
+                                            class="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-5 w-5"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                fill-rule="evenodd"
+                                                d="M4 16.5v-13h-.25a.75.75 0 010-1.5h12.5a.75.75 0 010 1.5H16v13h.25a.75.75 0 010 1.5h-3.5a.75.75 0 01-.75-.75v-2.5a.75.75 0 00-.75-.75h-2.5a.75.75 0 00-.75.75v2.5a.75.75 0 01-.75.75h-3.5a.75.75 0 010-1.5H4zm3-11a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zM7.5 9a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1zM11 5.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zm.5 3.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1z"
+                                                clip-rule="evenodd"
+                                            />
+                                        </svg> -->
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-5 w-5"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M10.5 19.5h3m-6.75 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-15a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 4.5v15a2.25 2.25 0 0 0 2.25 2.25Z"
+                                            />
+                                        </svg>
+                                        <span>Tablet</span>
+                                    </a>
+                                    <a
+                                        href="#"
+                                        class="border-indigo-500 text-indigo-600 group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
+                                        aria-current="page"
+                                    >
+                                        <!-- <svg
+                                            class="text-indigo-500 -ml-0.5 mr-2 h-5 w-5"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM1.615 16.428a1.224 1.224 0 01-.569-1.175 6.002 6.002 0 0111.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 017 18a9.953 9.953 0 01-5.385-1.572zM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 00-1.588-3.755 4.502 4.502 0 015.874 2.636.818.818 0 01-.36.98A7.465 7.465 0 0114.5 16z"
+                                            />
+                                        </svg> -->
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="text-indigo-500 -ml-0.5 mr-2 h-5 w-5"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+                                            />
+                                        </svg>
+                                        <span>Mobile</span>
+                                    </a>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
                 {/if}
             </div>
         </main>
@@ -517,19 +731,49 @@
         <div class="flex flex-col gap-y-4">
             <ul role="list" class="divide-y divide-gray-100">
                 {#each Array.from(emails.values()) as email}
-                <li class="flex justify-between gap-x-6 py-5 hover:opacity-100 px-4 sm:px-6 lg:px-8 {selectedEmailId === email.id ? 'bg-gray-200 opacity-100' : 'opacity-80'}">
-                  <button class="flex min-w-0 gap-x-4 cursor-pointer" onclick={() => selectedEmailId = email.id}>
-                    <div class="flex flex-col items-center">
-                        <img class="size-12 flex-none rounded-full bg-gray-50" src="https://ui-avatars.com/api/?name={email.sender}" alt="">
-                        <p class="mt-1 text-wrap text-xs/5 text-gray-900">{formatDate(email.timestamp)}</p>
-                    </div>
-                    <div class="min-w-0 flex-auto flex flex-col items-start">
-                      <p class="text-sm/6 font-semibold text-gray-900">{email.subject}</p>
-                      <p class="mt-1 text-wrap text-xs/5 text-gray-500">from: {email.sender}</p>
-                      <p class="mt-1 text-wrap text-xs/5 text-gray-500">to: {email.recipients.split(",")}</p>
-                    </div>
-                </button>
-                </li>
+                    <li
+                        class="flex justify-between gap-x-6 py-5 hover:opacity-100 px-4 sm:px-6 lg:px-8 {selectedEmailId ===
+                        email.id
+                            ? 'bg-gray-200 opacity-100'
+                            : 'opacity-80'}"
+                    >
+                        <button
+                            class="flex min-w-0 gap-x-4 cursor-pointer"
+                            onclick={() => (selectedEmailId = email.id)}
+                        >
+                            <div class="flex flex-col items-center">
+                                <img
+                                    class="size-12 flex-none rounded-full bg-gray-50"
+                                    src="https://ui-avatars.com/api/?name={email.sender}"
+                                    alt=""
+                                />
+                                <p
+                                    class="mt-1 text-wrap text-xs/5 text-gray-900"
+                                >
+                                    {formatDate(email.timestamp)}
+                                </p>
+                            </div>
+                            <div
+                                class="min-w-0 flex-auto flex flex-col items-start"
+                            >
+                                <p
+                                    class="text-sm/6 font-semibold text-gray-900"
+                                >
+                                    {email.subject}
+                                </p>
+                                <p
+                                    class="mt-1 text-wrap text-xs/5 text-gray-500"
+                                >
+                                    from: {email.sender}
+                                </p>
+                                <p
+                                    class="mt-1 text-wrap text-xs/5 text-gray-500"
+                                >
+                                    to: {email.recipients.split(",")}
+                                </p>
+                            </div>
+                        </button>
+                    </li>
                 {/each}
             </ul>
         </div>
