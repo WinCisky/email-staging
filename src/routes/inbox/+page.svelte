@@ -6,6 +6,7 @@
 
     let isMobileMenuOpen = $state(false);
     let isUserMenuOpen = $state(false);
+    let isSelectedEmailMenuOpen = $state(false);
     let emails = $state(new Map<number, any>());
     let page = $state(1);
     let selectedEmailId: number | null = $state(null);
@@ -17,6 +18,10 @@
 
     function toggleUserMenu() {
         isUserMenuOpen = !isUserMenuOpen;
+    }
+
+    function toggleSelectedEmailMenu() {
+        isSelectedEmailMenuOpen = !isSelectedEmailMenuOpen;
     }
 
     function signOut() {
@@ -45,10 +50,22 @@
         };
     }
 
-    function formatDate(dateString: string): string {
+    function formatDate(dateString: string, full: boolean = false): string {
         console.log(dateString);
         const locale = "it-IT";
         const timeZone = "Europe/Rome";
+
+        if (full) {
+            const dateFormatter = new Intl.DateTimeFormat(locale, {
+                year: "numeric",
+                month: "numeric",
+                day: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+                timeZone,
+            });
+            return dateFormatter.format(new Date(dateString));
+        }
 
         const date = new Date(dateString);
         const today = new Date();
@@ -95,9 +112,9 @@
         if (!user) {
             window.location.href = `${base}/`;
         } else {
-            // const data = [{"id":1,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <226dcc5b-4d8a-6f44-7c45-266fc3e9f5a8@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:01 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-1e24ea08a4e0b6fe-Part_1\"\r\n\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-1e24ea08a4e0b6fe-Part_1--\r\n","timestamp":"2024-12-03 11:39:02"},{"id":2,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <842e18e7-0e8e-b526-9f46-1126b13cf46a@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:05 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-c758aa0442799687-Part_1\"\r\n\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-c758aa0442799687-Part_1--\r\n","timestamp":"2024-12-03 11:39:05"},{"id":3,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <4b244f2f-df0a-ed4d-5c7d-efad5782b022@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:06 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-7e0f1c14217829ca-Part_1\"\r\n\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-7e0f1c14217829ca-Part_1--\r\n","timestamp":"2024-12-03 11:39:06"}];
-            // emails = new Map(data.map((email: any) => [email.id, email]));
-            // return;
+            const data = [{"id":1,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <226dcc5b-4d8a-6f44-7c45-266fc3e9f5a8@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:01 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-1e24ea08a4e0b6fe-Part_1\"\r\n\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-1e24ea08a4e0b6fe-Part_1--\r\n","timestamp":"2024-12-03 11:39:02"},{"id":2,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <842e18e7-0e8e-b526-9f46-1126b13cf46a@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:05 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-c758aa0442799687-Part_1\"\r\n\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-c758aa0442799687-Part_1--\r\n","timestamp":"2024-12-03 11:39:05"},{"id":3,"username":"your_username1","password":"your_password2","sender":"sender@example.com","recipients":"recipient@example.com","subject":"Hello","content":"From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <4b244f2f-df0a-ed4d-5c7d-efad5782b022@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:06 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary=\"--_NmP-7e0f1c14217829ca-Part_1\"\r\n\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-7e0f1c14217829ca-Part_1--\r\n","timestamp":"2024-12-03 11:39:06"}];
+            emails = new Map(data.map((email: any) => [email.id, email]));
+            return;
             const decodedUser = JSON.parse(user!);
             const response = await fetch(
                 `${endpoint}/emails?username=${decodedUser.username}&password=${decodedUser.password}&page=${page}`,
@@ -423,7 +440,7 @@
             <div class="px-4 py-10 sm:px-6 lg:px-8 lg:py-6">
                 <!-- Main area -->
                 {#if selectedEmailId !== null}
-                    <div class="flex flex-col gap-y-4">
+                    <!-- <div class="flex flex-col gap-y-4">
                         <div class="bg-white rounded-lg shadow-sm p-6">
                             <h2 class="text-lg font-semibold text-gray-900">
                                 {emails.get(selectedEmailId).subject}
@@ -432,20 +449,75 @@
                                 {selectedEmailContent}
                             </p>
                         </div>
-                    </div>
+                    </div> -->
+                    <div class="border-b border-gray-200 pb-5">
+                        <div class="sm:flex sm:items-baseline sm:justify-between">
+                          <div class="sm:w-0 sm:flex-1">
+                            <h1 id="message-heading" class="text-base font-semibold leading-6 text-gray-900">
+                                {emails.get(selectedEmailId).subject}
+                            </h1>
+                            <p class="mt-1 truncate text-sm text-gray-500">
+                                From: {emails.get(selectedEmailId).sender}
+                            </p>
+                            <p class="mt-1 truncate text-sm text-gray-500">
+                                To: {emails.get(selectedEmailId).recipients.split(",")}
+                            </p>
+                          </div>
+
+                          <div class="mt-4 flex items-center justify-between sm:ml-6 sm:mt-0 sm:flex-shrink-0 sm:justify-start">
+                            <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-600/20">{formatDate(emails.get(selectedEmailId).timestamp, true)}</span>
+                            <div class="relative ml-3 inline-block text-left">
+                              <div>
+                                <button type="button" class="-my-2 flex items-center rounded-full bg-white p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="menu-0-button" aria-expanded="false" aria-haspopup="true" onclick={toggleSelectedEmailMenu}>
+                                  <span class="sr-only">Open options</span>
+                                  <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" />
+                                  </svg>
+                                </button>
+                              </div>
+
+                              <!--
+                                Dropdown menu, show/hide based on menu state.
+
+                                Entering: "transition ease-out duration-100"
+                                  From: "transform opacity-0 scale-95"
+                                  To: "transform opacity-100 scale-100"
+                                Leaving: "transition ease-in duration-75"
+                                  From: "transform opacity-100 scale-100"
+                                  To: "transform opacity-0 scale-95"
+                              -->
+                              <div class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-0-button" tabindex="-1" class:hidden={!isSelectedEmailMenuOpen}>
+                                <div class="py-1" role="none">
+                                  <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+                                  <a href="#" class="text-gray-700 flex justify-between px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-0-item-0">
+                                    <span>Edit</span>
+                                  </a>
+                                  <a href="#" class="text-gray-700 flex justify-between px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-0-item-1">
+                                    <span>Duplicate</span>
+                                  </a>
+                                  <button type="button" class="text-gray-700 flex w-full justify-between px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-0-item-2">
+                                    <span>Archive</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
                 {/if}
             </div>
         </main>
     </div>
 
     <aside
-        class="fixed bottom-0 left-20 top-16 xxl:hidden w-96 overflow-y-auto border-r border-gray-200 px-4 py-6 sm:px-6 lg:px-8 xl:block"
+        class="fixed bottom-0 left-20 top-16 xxl:hidden w-96 overflow-y-auto border-r border-gray-200 xl:block"
     >
         <!-- Secondary column (hidden on smaller screens) -->
         <div class="flex flex-col gap-y-4">
             <ul role="list" class="divide-y divide-gray-100">
                 {#each Array.from(emails.values()) as email}
-                <li class="flex justify-between gap-x-6 py-5">
+                <li class="flex justify-between gap-x-6 py-5 hover:opacity-100 px-4 sm:px-6 lg:px-8 {selectedEmailId === email.id ? 'bg-gray-200 opacity-100' : 'opacity-80'}">
                   <button class="flex min-w-0 gap-x-4 cursor-pointer" onclick={() => selectedEmailId = email.id}>
                     <div class="flex flex-col items-center">
                         <img class="size-12 flex-none rounded-full bg-gray-50" src="https://ui-avatars.com/api/?name={email.sender}" alt="">
