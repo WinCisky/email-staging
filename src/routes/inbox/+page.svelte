@@ -1,8 +1,10 @@
 <script lang="ts">
     import { base } from "$app/paths";
     import { onMount } from "svelte";
+    import PostalMime from "postal-mime";
 
-    const endpoint = "http://localhost:3000";
+    // const endpoint = "http://localhost:3000";
+    const endpoint = "https://test.opentrust.it";
 
     let isMobileMenuOpen = $state(false);
     let isUserMenuOpen = $state(false);
@@ -11,7 +13,7 @@
     let page = $state(1);
     let selectedEmailId: number | null = $state(null);
     let selectedEmailContent: string | null = $state(null);
-    let selectedPreviewLayout: 'desktop' | 'tablet' | 'mobile' = 'desktop';
+    let selectedPreviewLayout: 'desktop' | 'tablet' | 'mobile' = $state('desktop');
 
     function toggleMobileMenu() {
         isMobileMenuOpen = !isMobileMenuOpen;
@@ -25,34 +27,42 @@
         isSelectedEmailMenuOpen = !isSelectedEmailMenuOpen;
     }
 
+    function setPreviewLayout(layout: 'desktop' | 'tablet' | 'mobile') {
+        selectedPreviewLayout = layout;
+    }
+
     function signOut() {
         localStorage.removeItem("user");
         window.location.href = `${base}/`;
     }
 
-    function parseEmail(emailContent: string) {
-        // Dividi l'email in intestazioni e corpo
-        const [headers, ...bodyParts] = emailContent.split("\r\n\r\n");
-        const body = bodyParts.join("\r\n\r\n");
+    // function parseEmail(emailContent: string) {
+    //     // Dividi l'email in intestazioni e corpo
+    //     const [headers, ...bodyParts] = emailContent.split("\r\n\r\n");
+    //     const body = bodyParts.join("\r\n\r\n");
 
-        // Dividi le intestazioni in singole righe
-        const headerLines = headers.split("\r\n");
-        const headerMap: any = {};
+    //     // Dividi le intestazioni in singole righe
+    //     const headerLines = headers.split("\r\n");
+    //     const headerMap: any = {};
 
-        // Crea una mappa delle intestazioni
-        headerLines.forEach((line) => {
-            const [key, value] = line.split(": ");
-            headerMap[key] = value;
-        });
+    //     // Crea una mappa delle intestazioni
+    //     headerLines.forEach((line) => {
+    //         const [key, value] = line.split(": ");
+    //         headerMap[key] = value;
+    //     });
 
-        return {
-            headers: headerMap,
-            body: body,
-        };
+    //     return {
+    //         headers: headerMap,
+    //         body: body,
+    //     };
+    // }
+
+    async function parseEmail(emailContent: string) {
+        const parsedEmail = await PostalMime.parse(emailContent);
+        return parsedEmail;
     }
 
     function formatDate(dateString: string, full: boolean = false): string {
-        console.log(dateString);
         const locale = "it-IT";
         const timeZone = "Europe/Rome";
 
@@ -99,7 +109,22 @@
         if (selectedEmailId !== null) {
             const email = emails.get(selectedEmailId);
             if (email) {
-                selectedEmailContent = parseEmail(email.content).body ?? null;
+                parseEmail(email.content).then((parsedEmail) => {
+                    if (parsedEmail) {
+                        selectedEmailContent = parsedEmail.html ?? null;
+                        const shadowEmail = document.getElementById("shadow-email");
+                        if (shadowEmail && selectedEmailContent) {
+                            const shadow = shadowEmail.shadowRoot || shadowEmail.attachShadow({ mode: 'open' });
+                            // clear the shadow root
+                            shadow.innerHTML = "";
+                            const shadowEmailContent = document.createElement("div");
+                            shadowEmailContent.innerHTML = selectedEmailContent;
+                            shadow.appendChild(shadowEmailContent);
+                        }
+                    } else {
+                        selectedEmailContent = null;
+                    }
+                });
             } else {
                 selectedEmailContent = null;
             }
@@ -113,43 +138,43 @@
         if (!user) {
             window.location.href = `${base}/`;
         } else {
-            const data = [
-                {
-                    id: 1,
-                    username: "your_username1",
-                    password: "your_password2",
-                    sender: "sender@example.com",
-                    recipients: "recipient@example.com",
-                    subject: "Hello",
-                    content:
-                        'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <226dcc5b-4d8a-6f44-7c45-266fc3e9f5a8@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:01 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-1e24ea08a4e0b6fe-Part_1"\r\n\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-1e24ea08a4e0b6fe-Part_1--\r\n',
-                    timestamp: "2024-12-03 11:39:02",
-                },
-                {
-                    id: 2,
-                    username: "your_username1",
-                    password: "your_password2",
-                    sender: "sender@example.com",
-                    recipients: "recipient@example.com",
-                    subject: "Hello",
-                    content:
-                        'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <842e18e7-0e8e-b526-9f46-1126b13cf46a@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:05 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-c758aa0442799687-Part_1"\r\n\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-c758aa0442799687-Part_1--\r\n',
-                    timestamp: "2024-12-03 11:39:05",
-                },
-                {
-                    id: 3,
-                    username: "your_username1",
-                    password: "your_password2",
-                    sender: "sender@example.com",
-                    recipients: "recipient@example.com",
-                    subject: "Hello",
-                    content:
-                        'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <4b244f2f-df0a-ed4d-5c7d-efad5782b022@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:06 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-7e0f1c14217829ca-Part_1"\r\n\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-7e0f1c14217829ca-Part_1--\r\n',
-                    timestamp: "2024-12-03 11:39:06",
-                },
-            ];
-            emails = new Map(data.map((email: any) => [email.id, email]));
-            return;
+            // const data = [
+            //     {
+            //         id: 1,
+            //         username: "your_username1",
+            //         password: "your_password2",
+            //         sender: "sender@example.com",
+            //         recipients: "recipient@example.com",
+            //         subject: "Hello",
+            //         content:
+            //             'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <226dcc5b-4d8a-6f44-7c45-266fc3e9f5a8@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:01 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-1e24ea08a4e0b6fe-Part_1"\r\n\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-1e24ea08a4e0b6fe-Part_1--\r\n',
+            //         timestamp: "2024-12-03 11:39:02",
+            //     },
+            //     {
+            //         id: 2,
+            //         username: "your_username1",
+            //         password: "your_password2",
+            //         sender: "sender@example.com",
+            //         recipients: "recipient@example.com",
+            //         subject: "Hello",
+            //         content:
+            //             'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <842e18e7-0e8e-b526-9f46-1126b13cf46a@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:05 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-c758aa0442799687-Part_1"\r\n\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-c758aa0442799687-Part_1--\r\n',
+            //         timestamp: "2024-12-03 11:39:05",
+            //     },
+            //     {
+            //         id: 3,
+            //         username: "your_username1",
+            //         password: "your_password2",
+            //         sender: "sender@example.com",
+            //         recipients: "recipient@example.com",
+            //         subject: "Hello",
+            //         content:
+            //             'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <4b244f2f-df0a-ed4d-5c7d-efad5782b022@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:06 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-7e0f1c14217829ca-Part_1"\r\n\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-7e0f1c14217829ca-Part_1--\r\n',
+            //         timestamp: "2024-12-03 11:39:06",
+            //     },
+            // ];
+            // emails = new Map(data.map((email: any) => [email.id, email]));
+            // return;
             const decodedUser = JSON.parse(user!);
             const response = await fetch(
                 `${endpoint}/emails?username=${decodedUser.username}&password=${decodedUser.password}&page=${page}`,
@@ -621,9 +646,9 @@
                                     aria-label="Tabs"
                                 >
                                     <!-- Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-                                    <a
-                                        href="#"
-                                        class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
+                                    <button
+                                        onclick={() => setPreviewLayout('desktop')}
+                                        class="group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium {selectedPreviewLayout === 'desktop' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
                                     >
                                         <!-- Current: "text-indigo-500", Default: "text-gray-400 group-hover:text-gray-500" -->
                                         <!-- <svg
@@ -642,7 +667,7 @@
                                             viewBox="0 0 24 24"
                                             stroke-width="1.5"
                                             stroke="currentColor"
-                                            class="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-5 w-5"
+                                            class="-ml-0.5 mr-2 h-5 w-5 {selectedPreviewLayout === "desktop" ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -651,10 +676,10 @@
                                             />
                                         </svg>
                                         <span>Desktop</span>
-                                    </a>
-                                    <a
-                                        href="#"
-                                        class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
+                                    </button>
+                                    <button
+                                        onclick={() => setPreviewLayout('tablet')}
+                                        class="group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium {selectedPreviewLayout === 'tablet' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
                                     >
                                         <!-- <svg
                                             class="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-5 w-5"
@@ -674,7 +699,7 @@
                                             viewBox="0 0 24 24"
                                             stroke-width="1.5"
                                             stroke="currentColor"
-                                            class="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-5 w-5"
+                                            class="-ml-0.5 mr-2 h-5 w-5 {selectedPreviewLayout === "tablet" ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -683,11 +708,10 @@
                                             />
                                         </svg>
                                         <span>Tablet</span>
-                                    </a>
-                                    <a
-                                        href="#"
-                                        class="border-indigo-500 text-indigo-600 group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium"
-                                        aria-current="page"
+                                    </button>
+                                    <button
+                                        onclick={() => setPreviewLayout('mobile')}
+                                        class="group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium {selectedPreviewLayout === 'mobile' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
                                     >
                                         <!-- <svg
                                             class="text-indigo-500 -ml-0.5 mr-2 h-5 w-5"
@@ -705,7 +729,7 @@
                                             viewBox="0 0 24 24"
                                             stroke-width="1.5"
                                             stroke="currentColor"
-                                            class="text-indigo-500 -ml-0.5 mr-2 h-5 w-5"
+                                            class="-ml-0.5 mr-2 h-5 w-5 {selectedPreviewLayout === "mobile" ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -714,11 +738,12 @@
                                             />
                                         </svg>
                                         <span>Mobile</span>
-                                    </a>
+                                    </button>
                                 </nav>
                             </div>
                         </div>
                     </div>
+                    <div class="mt-6 border-2 border-gray-200 rounded-lg {selectedPreviewLayout}" id="shadow-email"></div>
                 {/if}
             </div>
         </main>
@@ -779,3 +804,19 @@
         </div>
     </aside>
 </div>
+
+<style>
+    /* smmothly transition between max widths */
+    #shadow-email {
+        transition: all 0.5s;
+    }
+    #shadow-email.mobile {
+        max-width: 375px;
+    }
+    #shadow-email.tablet {
+        max-width: 768px;
+    }
+    #shadow-email.desktop {
+        max-width: 100%;
+    }
+</style>
