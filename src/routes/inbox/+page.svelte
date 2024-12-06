@@ -13,7 +13,8 @@
     let page = $state(1);
     let selectedEmailId: number | null = $state(null);
     let selectedEmailContent: string | null = $state(null);
-    let selectedPreviewLayout: 'desktop' | 'tablet' | 'mobile' = $state('desktop');
+    let selectedPreviewLayout: "desktop" | "tablet" | "mobile" =
+        $state("desktop");
 
     function toggleMobileMenu() {
         isMobileMenuOpen = !isMobileMenuOpen;
@@ -27,7 +28,7 @@
         isSelectedEmailMenuOpen = !isSelectedEmailMenuOpen;
     }
 
-    function setPreviewLayout(layout: 'desktop' | 'tablet' | 'mobile') {
+    function setPreviewLayout(layout: "desktop" | "tablet" | "mobile") {
         selectedPreviewLayout = layout;
     }
 
@@ -36,29 +37,9 @@
         window.location.href = `${base}/`;
     }
 
-    // function parseEmail(emailContent: string) {
-    //     // Dividi l'email in intestazioni e corpo
-    //     const [headers, ...bodyParts] = emailContent.split("\r\n\r\n");
-    //     const body = bodyParts.join("\r\n\r\n");
-
-    //     // Dividi le intestazioni in singole righe
-    //     const headerLines = headers.split("\r\n");
-    //     const headerMap: any = {};
-
-    //     // Crea una mappa delle intestazioni
-    //     headerLines.forEach((line) => {
-    //         const [key, value] = line.split(": ");
-    //         headerMap[key] = value;
-    //     });
-
-    //     return {
-    //         headers: headerMap,
-    //         body: body,
-    //     };
-    // }
-
     async function parseEmail(emailContent: string) {
         const parsedEmail = await PostalMime.parse(emailContent);
+        // console.log(parsedEmail);
         return parsedEmail;
     }
 
@@ -112,12 +93,16 @@
                 parseEmail(email.content).then((parsedEmail) => {
                     if (parsedEmail) {
                         selectedEmailContent = parsedEmail.html ?? null;
-                        const shadowEmail = document.getElementById("shadow-email");
+                        const shadowEmail =
+                            document.getElementById("shadow-email");
                         if (shadowEmail && selectedEmailContent) {
-                            const shadow = shadowEmail.shadowRoot || shadowEmail.attachShadow({ mode: 'open' });
+                            const shadow =
+                                shadowEmail.shadowRoot ||
+                                shadowEmail.attachShadow({ mode: "open" });
                             // clear the shadow root
                             shadow.innerHTML = "";
-                            const shadowEmailContent = document.createElement("div");
+                            const shadowEmailContent =
+                                document.createElement("div");
                             shadowEmailContent.innerHTML = selectedEmailContent;
                             shadow.appendChild(shadowEmailContent);
                         }
@@ -622,52 +607,63 @@
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <div class="sm:hidden">
-                            <label for="tabs" class="sr-only"
-                                >Select a tab</label
-                            >
-                            <!-- Use an "onChange" listener to redirect the user to the selected tab URL. -->
-                            <select
-                                id="tabs"
-                                name="tabs"
-                                class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                            >
-                                <option>My Account</option>
-                                <option>Company</option>
-                                <option selected>Team Members</option>
-                                <option>Billing</option>
-                            </select>
-                        </div>
-                        <div class="hidden sm:block">
-                            <div class="border-b border-gray-200">
-                                <nav
-                                    class="-mb-px flex space-x-8"
-                                    aria-label="Tabs"
+
+                    <!-- tabs main content type -->
+                    <div class="mt-4">
+                        <div>
+                            <nav class="flex space-x-4 flex-col sm:flex-row" aria-label="Tabs">
+                                <!-- Current: "bg-indigo-100 text-indigo-700", Default: "text-gray-500 hover:text-gray-700" -->
+                                <a
+                                    href="#"
+                                    class="text-gray-500 hover:text-gray-700 rounded-md px-3 py-2 text-sm font-medium"
+                                    >Html</a
                                 >
-                                    <!-- Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" -->
-                                    <button
-                                        onclick={() => setPreviewLayout('desktop')}
-                                        class="group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium {selectedPreviewLayout === 'desktop' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
-                                    >
-                                        <!-- Current: "text-indigo-500", Default: "text-gray-400 group-hover:text-gray-500" -->
-                                        <!-- <svg
-                                            class="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-5 w-5"
-                                            viewBox="0 0 20 20"
-                                            fill="currentColor"
-                                            aria-hidden="true"
-                                        >
-                                            <path
-                                                d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z"
-                                            />
-                                        </svg> -->
+                                <a
+                                    href="#"
+                                    class="text-gray-500 hover:text-gray-700 rounded-md px-3 py-2 text-sm font-medium"
+                                    >Text</a
+                                >
+                                <a
+                                    href="#"
+                                    class="bg-indigo-100 text-indigo-700 rounded-md px-3 py-2 text-sm font-medium"
+                                    aria-current="page">Raw</a
+                                >
+                                <a
+                                    href="#"
+                                    class="text-gray-500 hover:text-gray-700 rounded-md px-3 py-2 text-sm font-medium"
+                                    >Headers</a
+                                >
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- tabs layout -->
+                    <div>
+                        <div class="flex justify-center w-full mt-4">
+                            <nav
+                                class="isolate flex divide-x divide-gray-200 rounded-lg shadow w-fit"
+                                aria-label="Tabs"
+                            >
+                                <!-- Current: "text-gray-900", Default: "text-gray-500 hover:text-gray-700" -->
+                                <button
+                                    onclick={() => setPreviewLayout("desktop")}
+                                    class="rounded-l-lg group relative overflow-hidden bg-white py-4 px-4 text-center text-sm font-medium hover:bg-gray-50 focus:z-10 {selectedPreviewLayout ===
+                                    'desktop'
+                                        ? 'text-indigo-600'
+                                        : 'text-gray-500 hover:text-gray-700'}"
+                                    aria-current="page"
+                                >
+                                    <div class="flex">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
                                             viewBox="0 0 24 24"
                                             stroke-width="1.5"
                                             stroke="currentColor"
-                                            class="-ml-0.5 mr-2 h-5 w-5 {selectedPreviewLayout === "desktop" ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}"
+                                            class="-ml-0.5 mr-2 h-5 w-5 {selectedPreviewLayout ===
+                                            'desktop'
+                                                ? 'text-indigo-500'
+                                                : 'text-gray-400 group-hover:text-gray-500'}"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -676,30 +672,33 @@
                                             />
                                         </svg>
                                         <span>Desktop</span>
-                                    </button>
-                                    <button
-                                        onclick={() => setPreviewLayout('tablet')}
-                                        class="group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium {selectedPreviewLayout === 'tablet' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
-                                    >
-                                        <!-- <svg
-                                            class="text-gray-400 group-hover:text-gray-500 -ml-0.5 mr-2 h-5 w-5"
-                                            viewBox="0 0 20 20"
-                                            fill="currentColor"
-                                            aria-hidden="true"
-                                        >
-                                            <path
-                                                fill-rule="evenodd"
-                                                d="M4 16.5v-13h-.25a.75.75 0 010-1.5h12.5a.75.75 0 010 1.5H16v13h.25a.75.75 0 010 1.5h-3.5a.75.75 0 01-.75-.75v-2.5a.75.75 0 00-.75-.75h-2.5a.75.75 0 00-.75.75v2.5a.75.75 0 01-.75.75h-3.5a.75.75 0 010-1.5H4zm3-11a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zM7.5 9a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1zM11 5.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5v1a.5.5 0 01-.5.5h-1a.5.5 0 01-.5-.5v-1zm.5 3.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h1a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5h-1z"
-                                                clip-rule="evenodd"
-                                            />
-                                        </svg> -->
+                                    </div>
+                                    <span
+                                        aria-hidden="true"
+                                        class="absolute inset-x-0 bottom-0 h-0.5 {selectedPreviewLayout ===
+                                        'desktop'
+                                            ? 'bg-indigo-500'
+                                            : 'bg-transparent'}"
+                                    ></span>
+                                </button>
+                                <button
+                                    onclick={() => setPreviewLayout("tablet")}
+                                    class="group relative overflow-hidden bg-white py-4 px-4 text-center text-sm font-medium hover:bg-gray-50 focus:z-10 {selectedPreviewLayout ===
+                                    'tablet'
+                                        ? 'text-indigo-600'
+                                        : 'text-gray-500 hover:text-gray-700'}"
+                                >
+                                    <div class="flex">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
                                             viewBox="0 0 24 24"
                                             stroke-width="1.5"
                                             stroke="currentColor"
-                                            class="-ml-0.5 mr-2 h-5 w-5 {selectedPreviewLayout === "tablet" ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}"
+                                            class="-ml-0.5 mr-2 h-5 w-5 {selectedPreviewLayout ===
+                                            'tablet'
+                                                ? 'text-indigo-500'
+                                                : 'text-gray-400 group-hover:text-gray-500'}"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -708,28 +707,33 @@
                                             />
                                         </svg>
                                         <span>Tablet</span>
-                                    </button>
-                                    <button
-                                        onclick={() => setPreviewLayout('mobile')}
-                                        class="group inline-flex items-center border-b-2 py-4 px-1 text-sm font-medium {selectedPreviewLayout === 'mobile' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}"
-                                    >
-                                        <!-- <svg
-                                            class="text-indigo-500 -ml-0.5 mr-2 h-5 w-5"
-                                            viewBox="0 0 20 20"
-                                            fill="currentColor"
-                                            aria-hidden="true"
-                                        >
-                                            <path
-                                                d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM1.615 16.428a1.224 1.224 0 01-.569-1.175 6.002 6.002 0 0111.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 017 18a9.953 9.953 0 01-5.385-1.572zM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 00-1.588-3.755 4.502 4.502 0 015.874 2.636.818.818 0 01-.36.98A7.465 7.465 0 0114.5 16z"
-                                            />
-                                        </svg> -->
+                                    </div>
+                                    <span
+                                        aria-hidden="true"
+                                        class="absolute inset-x-0 bottom-0 h-0.5 {selectedPreviewLayout ===
+                                        'tablet'
+                                            ? 'bg-indigo-500'
+                                            : 'bg-transparent'}"
+                                    ></span>
+                                </button>
+                                <button
+                                    onclick={() => setPreviewLayout("mobile")}
+                                    class="rounded-r-lg group relative overflow-hidden bg-white py-4 px-4 text-center text-sm font-medium hover:bg-gray-50 focus:z-10 {selectedPreviewLayout ===
+                                    'mobile'
+                                        ? 'text-indigo-600'
+                                        : 'text-gray-500 hover:text-gray-700'}"
+                                >
+                                    <div class="flex">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
                                             viewBox="0 0 24 24"
                                             stroke-width="1.5"
                                             stroke="currentColor"
-                                            class="-ml-0.5 mr-2 h-5 w-5 {selectedPreviewLayout === "mobile" ? 'text-indigo-500' : 'text-gray-400 group-hover:text-gray-500'}"
+                                            class="-ml-0.5 mr-2 h-5 w-5 {selectedPreviewLayout ===
+                                            'mobile'
+                                                ? 'text-indigo-500'
+                                                : 'text-gray-400 group-hover:text-gray-500'}"
                                         >
                                             <path
                                                 stroke-linecap="round"
@@ -738,12 +742,22 @@
                                             />
                                         </svg>
                                         <span>Mobile</span>
-                                    </button>
-                                </nav>
-                            </div>
+                                    </div>
+                                    <span
+                                        aria-hidden="true"
+                                        class="absolute inset-x-0 bottom-0 h-0.5 {selectedPreviewLayout ===
+                                        'mobile'
+                                            ? 'bg-indigo-500'
+                                            : 'bg-transparent'}"
+                                    ></span>
+                                </button>
+                            </nav>
                         </div>
                     </div>
-                    <div class="mt-6 border-2 border-gray-200 rounded-lg {selectedPreviewLayout}" id="shadow-email"></div>
+                    <div
+                        class="mt-6 border-2 border-gray-200 rounded-lg {selectedPreviewLayout} overflow-auto"
+                        id="shadow-email"
+                    ></div>
                 {/if}
             </div>
         </main>
