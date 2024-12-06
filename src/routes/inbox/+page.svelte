@@ -755,7 +755,7 @@
                         </div>
                     </div>
                     <div
-                        class="mt-6 border-2 border-gray-200 rounded-lg {selectedPreviewLayout} overflow-auto"
+                        class="mt-6 border-2 border-gray-200 rounded-lg {selectedPreviewLayout} overflow-auto mx-auto"
                         id="shadow-email"
                     ></div>
                 {/if}
@@ -796,17 +796,17 @@
                                 class="min-w-0 flex-auto flex flex-col items-start"
                             >
                                 <p
-                                    class="text-sm/6 font-semibold text-gray-900"
+                                    class="text-sm/6 font-semibold text-gray-900 text-left"
                                 >
                                     {email.subject}
                                 </p>
                                 <p
-                                    class="mt-1 text-wrap text-xs/5 text-gray-500"
+                                    class="mt-1 text-wrap text-xs/5 text-gray-500 text-left"
                                 >
                                     from: {email.sender}
                                 </p>
                                 <p
-                                    class="mt-1 text-wrap text-xs/5 text-gray-500"
+                                    class="mt-1 text-wrap text-xs/5 text-gray-500 text-left"
                                 >
                                     to: {email.recipients.split(",")}
                                 </p>
