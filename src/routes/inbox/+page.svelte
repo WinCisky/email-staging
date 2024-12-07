@@ -123,43 +123,6 @@
         if (!user) {
             window.location.href = `${base}/`;
         } else {
-            // const data = [
-            //     {
-            //         id: 1,
-            //         username: "your_username1",
-            //         password: "your_password2",
-            //         sender: "sender@example.com",
-            //         recipients: "recipient@example.com",
-            //         subject: "Hello",
-            //         content:
-            //             'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <226dcc5b-4d8a-6f44-7c45-266fc3e9f5a8@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:01 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-1e24ea08a4e0b6fe-Part_1"\r\n\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-1e24ea08a4e0b6fe-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-1e24ea08a4e0b6fe-Part_1--\r\n',
-            //         timestamp: "2024-12-03 11:39:02",
-            //     },
-            //     {
-            //         id: 2,
-            //         username: "your_username1",
-            //         password: "your_password2",
-            //         sender: "sender@example.com",
-            //         recipients: "recipient@example.com",
-            //         subject: "Hello",
-            //         content:
-            //             'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <842e18e7-0e8e-b526-9f46-1126b13cf46a@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:05 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-c758aa0442799687-Part_1"\r\n\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-c758aa0442799687-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-c758aa0442799687-Part_1--\r\n',
-            //         timestamp: "2024-12-03 11:39:05",
-            //     },
-            //     {
-            //         id: 3,
-            //         username: "your_username1",
-            //         password: "your_password2",
-            //         sender: "sender@example.com",
-            //         recipients: "recipient@example.com",
-            //         subject: "Hello",
-            //         content:
-            //             'From: Sender Name <sender@example.com>\r\nTo: recipient@example.com\r\nSubject: Hello\r\nMessage-ID: <4b244f2f-df0a-ed4d-5c7d-efad5782b022@example.com>\r\nDate: Tue, 03 Dec 2024 11:39:06 +0000\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative;\r\n boundary="--_NmP-7e0f1c14217829ca-Part_1"\r\n\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\nHello world?\r\n----_NmP-7e0f1c14217829ca-Part_1\r\nContent-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: 7bit\r\n\r\n<b>Hello world?</b>\r\n----_NmP-7e0f1c14217829ca-Part_1--\r\n',
-            //         timestamp: "2024-12-03 11:39:06",
-            //     },
-            // ];
-            // emails = new Map(data.map((email: any) => [email.id, email]));
-            // return;
             const decodedUser = JSON.parse(user!);
             const response = await fetch(
                 `${endpoint}/emails?username=${decodedUser.username}&password=${decodedUser.password}&page=${page}`,
@@ -611,28 +574,107 @@
                     <!-- tabs main content type -->
                     <div class="mt-4">
                         <div>
-                            <nav class="flex space-x-4 flex-col sm:flex-row" aria-label="Tabs">
+                            <nav
+                                class="flex space-x-4 flex-col sm:flex-row"
+                                aria-label="Tabs"
+                            >
                                 <!-- Current: "bg-indigo-100 text-indigo-700", Default: "text-gray-500 hover:text-gray-700" -->
                                 <a
                                     href="#"
                                     class="text-gray-500 hover:text-gray-700 rounded-md px-3 py-2 text-sm font-medium"
-                                    >Html</a
                                 >
+                                    <div class="flex items-center gap-1">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="size-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"
+                                            />
+                                        </svg>
+
+                                        Html
+                                    </div>
+                                </a>
                                 <a
                                     href="#"
                                     class="text-gray-500 hover:text-gray-700 rounded-md px-3 py-2 text-sm font-medium"
-                                    >Text</a
                                 >
+                                    <div class="flex items-center gap-1">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="size-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"
+                                            />
+                                        </svg>
+
+                                        Text
+                                    </div>
+                                </a>
                                 <a
                                     href="#"
                                     class="bg-indigo-100 text-indigo-700 rounded-md px-3 py-2 text-sm font-medium"
-                                    aria-current="page">Raw</a
+                                    aria-current="page"
                                 >
+                                    <div class="flex items-center gap-1">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="size-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z"
+                                            />
+                                        </svg>
+                                        Raw
+                                    </div>
+                                </a>
                                 <a
                                     href="#"
                                     class="text-gray-500 hover:text-gray-700 rounded-md px-3 py-2 text-sm font-medium"
-                                    >Headers</a
                                 >
+                                    <div class="flex items-center gap-1">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="size-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"
+                                            />
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M6 6h.008v.008H6V6Z"
+                                            />
+                                        </svg>
+                                        Headers
+                                    </div>
+                                </a>
                             </nav>
                         </div>
                     </div>
@@ -793,7 +835,7 @@
                                 </p>
                             </div>
                             <div
-                                class="min-w-0 flex-auto flex flex-col items-start"
+                                class="hidden min-w-0 flex-auto sm:flex flex-col items-start"
                             >
                                 <p
                                     class="text-sm/6 font-semibold text-gray-900 text-left"
