@@ -12,9 +12,11 @@
     let emails = $state(new Map<number, any>());
     let page = $state(1);
     let selectedEmailId: number | null = $state(null);
-    let selectedEmailContent: string | null = $state(null);
+    let parsedEmail: any = $state(null);
     let selectedPreviewLayout: "desktop" | "tablet" | "mobile" =
         $state("desktop");
+    let selectedEmailViewMode: "html" | "text" | "raw" | "headers" =
+        $state("html");
 
     function toggleMobileMenu() {
         isMobileMenuOpen = !isMobileMenuOpen;
@@ -30,6 +32,11 @@
 
     function setPreviewLayout(layout: "desktop" | "tablet" | "mobile") {
         selectedPreviewLayout = layout;
+    }
+
+    function setEmailViewMode(mode: "html" | "text" | "raw" | "headers") {
+        selectedEmailViewMode = mode;
+        updateShownContent();
     }
 
     function signOut() {
@@ -86,35 +93,60 @@
         }
     }
 
+    function escapeHTML(text: string) {
+        const element = document.createElement('div');
+        if (text) {
+            element.innerText = text; // Set the text content
+            element.textContent = text; // For browser compatibility
+        }
+        return element.innerHTML; // Get the escaped HTML content
+    }
+
+    function updateShownContent() {
+        const shadowEmail =
+        document.getElementById("shadow-email");
+        if (!shadowEmail) return;
+        const shadow =
+            shadowEmail.shadowRoot ||
+            shadowEmail.attachShadow({ mode: "open" });
+        // clear the shadow root
+        shadow.innerHTML = "";
+        let shadowEmailContent: any = document.createElement("div");
+
+        switch (selectedEmailViewMode) {
+            case 'html':
+                shadowEmailContent.innerHTML = parsedEmail.html;
+            break
+            case 'text':
+                shadowEmailContent.innerHTML = parsedEmail.text;
+            break
+            case 'raw':
+                shadowEmailContent = document.createElement("pre");
+                if (selectedEmailId) {
+                    const email = emails.get(selectedEmailId);
+                    if (email) {
+                        console.log(email.content)
+                        shadowEmailContent.innerHTML = escapeHTML(email.content);
+                    }
+                }
+            break
+            case 'headers':
+                shadowEmailContent.innerHTML = parsedEmail.headers;
+            break
+                
+        }
+        shadow.appendChild(shadowEmailContent);
+    }
+
     $effect(() => {
         if (selectedEmailId !== null) {
             const email = emails.get(selectedEmailId);
             if (email) {
-                parseEmail(email.content).then((parsedEmail) => {
-                    if (parsedEmail) {
-                        selectedEmailContent = parsedEmail.html ?? null;
-                        const shadowEmail =
-                            document.getElementById("shadow-email");
-                        if (shadowEmail && selectedEmailContent) {
-                            const shadow =
-                                shadowEmail.shadowRoot ||
-                                shadowEmail.attachShadow({ mode: "open" });
-                            // clear the shadow root
-                            shadow.innerHTML = "";
-                            const shadowEmailContent =
-                                document.createElement("div");
-                            shadowEmailContent.innerHTML = selectedEmailContent;
-                            shadow.appendChild(shadowEmailContent);
-                        }
-                    } else {
-                        selectedEmailContent = null;
-                    }
+                parseEmail(email.content).then((result) => {
+                    parsedEmail = result;
+                    updateShownContent();
                 });
-            } else {
-                selectedEmailContent = null;
             }
-        } else {
-            selectedEmailContent = null;
         }
     });
 
@@ -579,9 +611,12 @@
                                 aria-label="Tabs"
                             >
                                 <!-- Current: "bg-indigo-100 text-indigo-700", Default: "text-gray-500 hover:text-gray-700" -->
-                                <a
-                                    href="#"
-                                    class="text-gray-500 hover:text-gray-700 rounded-md px-3 py-2 text-sm font-medium"
+                                <button
+                                    onclick={() => setEmailViewMode("html")}
+                                    class="rounded-md px-3 py-2 text-sm font-medium {selectedEmailViewMode ===
+                                    'html'
+                                        ? 'bg-indigo-100 text-indigo-700'
+                                        : 'text-gray-500 hover:text-gray-700'}"
                                 >
                                     <div class="flex items-center gap-1">
                                         <svg
@@ -601,10 +636,13 @@
 
                                         Html
                                     </div>
-                                </a>
-                                <a
-                                    href="#"
-                                    class="text-gray-500 hover:text-gray-700 rounded-md px-3 py-2 text-sm font-medium"
+                                </button>
+                                <button
+                                    onclick={() => setEmailViewMode("text")}
+                                    class="rounded-md px-3 py-2 text-sm font-medium {selectedEmailViewMode ===
+                                    'text'
+                                        ? 'bg-indigo-100 text-indigo-700'
+                                        : 'text-gray-500 hover:text-gray-700'}"
                                 >
                                     <div class="flex items-center gap-1">
                                         <svg
@@ -624,10 +662,13 @@
 
                                         Text
                                     </div>
-                                </a>
-                                <a
-                                    href="#"
-                                    class="bg-indigo-100 text-indigo-700 rounded-md px-3 py-2 text-sm font-medium"
+                                </button>
+                                <button
+                                    onclick={() => setEmailViewMode("raw")}
+                                    class="rounded-md px-3 py-2 text-sm font-medium {selectedEmailViewMode ===
+                                    'raw'
+                                        ? 'bg-indigo-100 text-indigo-700'
+                                        : 'text-gray-500 hover:text-gray-700'}"
                                     aria-current="page"
                                 >
                                     <div class="flex items-center gap-1">
@@ -647,10 +688,13 @@
                                         </svg>
                                         Raw
                                     </div>
-                                </a>
-                                <a
-                                    href="#"
-                                    class="text-gray-500 hover:text-gray-700 rounded-md px-3 py-2 text-sm font-medium"
+                                </button>
+                                <button
+                                    onclick={() => setEmailViewMode("headers")}
+                                    class="rounded-md px-3 py-2 text-sm font-medium {selectedEmailViewMode ===
+                                    'headers'
+                                        ? 'bg-indigo-100 text-indigo-700'
+                                        : 'text-gray-500 hover:text-gray-700'}"
                                 >
                                     <div class="flex items-center gap-1">
                                         <svg
@@ -674,7 +718,7 @@
                                         </svg>
                                         Headers
                                     </div>
-                                </a>
+                                </button>
                             </nav>
                         </div>
                     </div>
