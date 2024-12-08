@@ -35,6 +35,9 @@
     }
 
     function setEmailViewMode(mode: "html" | "text" | "raw" | "headers") {
+        if (mode === "text" && (!parsedEmail || !parsedEmail.text)) {
+            return;
+        }
         selectedEmailViewMode = mode;
         updateShownContent();
     }
@@ -42,6 +45,31 @@
     function signOut() {
         localStorage.removeItem("user");
         window.location.href = `${base}/`;
+    }
+
+    function downloadAttachment(attachment: any) {
+        const blob = new Blob([attachment.content], {
+            type: attachment.mimeType,
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.target = "_blank";
+        a.download = attachment.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function formatEmails(emails: any[]) {
+        return emails.map((email) => {
+            if (email.name) {
+                return `${email.name} <${email.address}>`;
+            } else {
+                return email.address;
+            }
+        });
     }
 
     async function parseEmail(emailContent: string) {
@@ -94,7 +122,7 @@
     }
 
     function escapeHTML(text: string) {
-        const element = document.createElement('div');
+        const element = document.createElement("div");
         if (text) {
             element.innerText = text; // Set the text content
             element.textContent = text; // For browser compatibility
@@ -103,8 +131,7 @@
     }
 
     function updateShownContent() {
-        const shadowEmail =
-        document.getElementById("shadow-email");
+        const shadowEmail = document.getElementById("shadow-email");
         if (!shadowEmail) return;
         const shadow =
             shadowEmail.shadowRoot ||
@@ -114,26 +141,26 @@
         let shadowEmailContent: any = document.createElement("div");
 
         switch (selectedEmailViewMode) {
-            case 'html':
+            case "html":
                 shadowEmailContent.innerHTML = parsedEmail.html;
-            break
-            case 'text':
+                break;
+            case "text":
                 shadowEmailContent.innerHTML = parsedEmail.text;
-            break
-            case 'raw':
+                break;
+            case "raw":
                 shadowEmailContent = document.createElement("pre");
                 if (selectedEmailId) {
                     const email = emails.get(selectedEmailId);
                     if (email) {
-                        console.log(email.content)
-                        shadowEmailContent.innerHTML = escapeHTML(email.content);
+                        shadowEmailContent.innerHTML = escapeHTML(
+                            email.content,
+                        );
                     }
                 }
-            break
-            case 'headers':
-                shadowEmailContent.innerHTML = parsedEmail.headers;
-            break
-                
+                break;
+            case "headers":
+                shadowEmailContent.innerHTML = "";
+                break;
         }
         shadow.appendChild(shadowEmailContent);
     }
@@ -143,6 +170,7 @@
             const email = emails.get(selectedEmailId);
             if (email) {
                 parseEmail(email.content).then((result) => {
+                    // console.log(result);
                     parsedEmail = result;
                     updateShownContent();
                 });
@@ -499,16 +527,27 @@
                                     id="message-heading"
                                     class="text-base font-semibold leading-6 text-gray-900"
                                 >
-                                    {emails.get(selectedEmailId).subject}
+                                    {parsedEmail ? parsedEmail.subject : ""}
                                 </h1>
                                 <p class="mt-1 truncate text-sm text-gray-500">
-                                    From: {emails.get(selectedEmailId).sender}
+                                    From: {parsedEmail
+                                        ? formatEmails([parsedEmail.from])
+                                        : ""}
                                 </p>
                                 <p class="mt-1 truncate text-sm text-gray-500">
-                                    To: {emails
-                                        .get(selectedEmailId)
-                                        .recipients.split(",")}
+                                    To: {parsedEmail
+                                        ? formatEmails(parsedEmail.to)
+                                        : ""}
                                 </p>
+                                {#if parsedEmail?.cc}
+                                    <p
+                                        class="mt-1 truncate text-sm text-gray-500"
+                                    >
+                                        Cc: {parsedEmail
+                                            ? formatEmails(parsedEmail.cc)
+                                            : ""}
+                                    </p>
+                                {/if}
                             </div>
 
                             <div
@@ -604,13 +643,11 @@
                     </div>
 
                     <!-- tabs main content type -->
-                    <div class="mt-4">
+                    <div
+                        class="mt-4 flex space-x-4 flex-col sm:flex-row justify-between"
+                    >
                         <div>
-                            <nav
-                                class="flex space-x-4 flex-col sm:flex-row"
-                                aria-label="Tabs"
-                            >
-                                <!-- Current: "bg-indigo-100 text-indigo-700", Default: "text-gray-500 hover:text-gray-700" -->
+                            <nav aria-label="Tabs">
                                 <button
                                     onclick={() => setEmailViewMode("html")}
                                     class="rounded-md px-3 py-2 text-sm font-medium {selectedEmailViewMode ===
@@ -633,7 +670,6 @@
                                                 d="M14.25 9.75 16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0 0 20.25 18V6A2.25 2.25 0 0 0 18 3.75H6A2.25 2.25 0 0 0 3.75 6v12A2.25 2.25 0 0 0 6 20.25Z"
                                             />
                                         </svg>
-
                                         Html
                                     </div>
                                 </button>
@@ -642,7 +678,10 @@
                                     class="rounded-md px-3 py-2 text-sm font-medium {selectedEmailViewMode ===
                                     'text'
                                         ? 'bg-indigo-100 text-indigo-700'
-                                        : 'text-gray-500 hover:text-gray-700'}"
+                                        : 'text-gray-500 hover:text-gray-700'} {parsedEmail &&
+                                    parsedEmail.text
+                                        ? ''
+                                        : 'cursor-not-allowed opacity-50'}"
                                 >
                                     <div class="flex items-center gap-1">
                                         <svg
@@ -659,7 +698,6 @@
                                                 d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"
                                             />
                                         </svg>
-
                                         Text
                                     </div>
                                 </button>
@@ -721,25 +759,16 @@
                                 </button>
                             </nav>
                         </div>
-                    </div>
-
-                    <!-- tabs layout -->
-                    <div>
-                        <div class="flex justify-center w-full mt-4">
-                            <nav
-                                class="isolate flex divide-x divide-gray-200 rounded-lg shadow w-fit"
-                                aria-label="Tabs"
-                            >
-                                <!-- Current: "text-gray-900", Default: "text-gray-500 hover:text-gray-700" -->
+                        <div class="flex justify-center">
+                            <nav class="flex w-fit" aria-label="Tabs">
                                 <button
                                     onclick={() => setPreviewLayout("desktop")}
-                                    class="rounded-l-lg group relative overflow-hidden bg-white py-4 px-4 text-center text-sm font-medium hover:bg-gray-50 focus:z-10 {selectedPreviewLayout ===
+                                    class="rounded-md px-3 py-2 text-sm font-medium {selectedPreviewLayout ===
                                     'desktop'
-                                        ? 'text-indigo-600'
+                                        ? 'bg-indigo-100 text-indigo-700'
                                         : 'text-gray-500 hover:text-gray-700'}"
-                                    aria-current="page"
                                 >
-                                    <div class="flex">
+                                    <div class="flex items-center gap-1">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -757,24 +786,17 @@
                                                 d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25"
                                             />
                                         </svg>
-                                        <span>Desktop</span>
+                                        Desktop
                                     </div>
-                                    <span
-                                        aria-hidden="true"
-                                        class="absolute inset-x-0 bottom-0 h-0.5 {selectedPreviewLayout ===
-                                        'desktop'
-                                            ? 'bg-indigo-500'
-                                            : 'bg-transparent'}"
-                                    ></span>
                                 </button>
                                 <button
                                     onclick={() => setPreviewLayout("tablet")}
-                                    class="group relative overflow-hidden bg-white py-4 px-4 text-center text-sm font-medium hover:bg-gray-50 focus:z-10 {selectedPreviewLayout ===
+                                    class="rounded-md px-3 py-2 text-sm font-medium {selectedPreviewLayout ===
                                     'tablet'
-                                        ? 'text-indigo-600'
+                                        ? 'bg-indigo-100 text-indigo-700'
                                         : 'text-gray-500 hover:text-gray-700'}"
                                 >
-                                    <div class="flex">
+                                    <div class="flex items-center gap-1">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -792,24 +814,17 @@
                                                 d="M10.5 19.5h3m-6.75 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-15a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 4.5v15a2.25 2.25 0 0 0 2.25 2.25Z"
                                             />
                                         </svg>
-                                        <span>Tablet</span>
+                                        Tablet
                                     </div>
-                                    <span
-                                        aria-hidden="true"
-                                        class="absolute inset-x-0 bottom-0 h-0.5 {selectedPreviewLayout ===
-                                        'tablet'
-                                            ? 'bg-indigo-500'
-                                            : 'bg-transparent'}"
-                                    ></span>
                                 </button>
                                 <button
                                     onclick={() => setPreviewLayout("mobile")}
-                                    class="rounded-r-lg group relative overflow-hidden bg-white py-4 px-4 text-center text-sm font-medium hover:bg-gray-50 focus:z-10 {selectedPreviewLayout ===
+                                    class="rounded-md px-3 py-2 text-sm font-medium {selectedPreviewLayout ===
                                     'mobile'
-                                        ? 'text-indigo-600'
+                                        ? 'bg-indigo-100 text-indigo-700'
                                         : 'text-gray-500 hover:text-gray-700'}"
                                 >
-                                    <div class="flex">
+                                    <div class="flex items-center gap-1">
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
@@ -824,26 +839,117 @@
                                             <path
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
-                                                d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+                                                d="M10.5 19.5h3m-6.75 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-15a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 4.5v15a2.25 2.25 0 0 0 2.25 2.25Z"
                                             />
                                         </svg>
-                                        <span>Mobile</span>
+                                        Mobile
                                     </div>
-                                    <span
-                                        aria-hidden="true"
-                                        class="absolute inset-x-0 bottom-0 h-0.5 {selectedPreviewLayout ===
-                                        'mobile'
-                                            ? 'bg-indigo-500'
-                                            : 'bg-transparent'}"
-                                    ></span>
                                 </button>
                             </nav>
                         </div>
                     </div>
+                    {#if parsedEmail && parsedEmail.attachments && parsedEmail.attachments.length > 0}
+                        <ul role="list" class="flex mt-4 gap-4 flex-wrap">
+                            {#each parsedEmail.attachments as attachment}
+                                <li
+                                    class="overflow-hidden rounded-xl border border-gray-200"
+                                >
+                                    <button
+                                        class="flex items-center gap-x-2 border-b border-gray-900/5 bg-gray-50 p-2 cursor-pointer"
+                                        onclick={() =>
+                                            downloadAttachment(attachment)}
+                                    >
+                                        {#if attachment.mimeType && attachment.mimeType.includes("image")}
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke-width="1.5"
+                                                stroke="currentColor"
+                                                class="size-6 flex-none text-gray-600"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                                                />
+                                            </svg>
+                                        {:else if attachment.mimeType && attachment.mimeType.includes("video")}
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke-width="1.5"
+                                                stroke="currentColor"
+                                                class="size-6 flex-none text-gray-600"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0 1 18 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0 1 18 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 0 1 6 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25C6 11.496 5.496 12 4.875 12M18 10.875c0 .621-.504 1.125-1.125 1.125M18 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m-12 5.25v-5.25m0 5.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125m-12 0v-1.5c0-.621-.504-1.125-1.125-1.125M18 18.375v-5.25m0 5.25v-1.5c0-.621.504-1.125 1.125-1.125M18 13.125v1.5c0 .621.504 1.125 1.125 1.125M18 13.125c0-.621.504-1.125 1.125-1.125M6 13.125v1.5c0 .621-.504 1.125-1.125 1.125M6 13.125C6 12.504 5.496 12 4.875 12m-1.5 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M19.125 12h1.5m0 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h1.5m14.25 0h1.5"
+                                                />
+                                            </svg>
+                                        {:else}
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke-width="1.5"
+                                                stroke="currentColor"
+                                                class="size-6 flex-none text-gray-600"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                                                />
+                                            </svg>
+                                        {/if}
+                                        <div
+                                            class="text-sm font-medium leading-6 text-gray-900"
+                                        >
+                                            {attachment.filename}
+                                        </div>
+                                    </button>
+                                </li>
+                            {/each}
+                        </ul>
+                    {/if}
                     <div
-                        class="mt-6 border-2 border-gray-200 rounded-lg {selectedPreviewLayout} overflow-auto mx-auto"
+                        class="mt-4 border-2 border-gray-200 rounded-lg {selectedPreviewLayout} overflow-auto mx-auto {selectedEmailViewMode ===
+                        'headers'
+                            ? 'hidden'
+                            : ''}"
                         id="shadow-email"
                     ></div>
+                    {#if selectedEmailViewMode === "headers"}
+                        <div class="mt-4">
+                            <div class="mt-6 border-t border-gray-100">
+                                <dl class="divide-y divide-gray-100">
+                                    {#each parsedEmail.headers as element, i}
+                                        <div
+                                            class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-3 {i %
+                                                2 ===
+                                            0
+                                                ? 'bg-gray-50'
+                                                : 'bg-white'}"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium leading-6 text-gray-900"
+                                            >
+                                                {element.key}
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2 sm:mt-0"
+                                            >
+                                                {element.value}
+                                            </dd>
+                                        </div>
+                                    {/each}
+                                </dl>
+                            </div>
+                        </div>
+                    {/if}
                 {/if}
             </div>
         </main>
