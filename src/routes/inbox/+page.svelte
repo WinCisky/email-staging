@@ -195,15 +195,39 @@
             }
         }
     });
+
+    // close menu when clicking outside
+    function clickOutside(node: HTMLElement) {
+        const handleClick = (event: any) => {
+            if (!event.target.closest("#mobile-menu")) {
+                isMobileMenuOpen = false;
+            }
+            if (!event.target.closest("#user-menu")) {
+                isUserMenuOpen = false;
+            }
+            if (!event.target.closest("#selected-email-menu")) {
+                isSelectedEmailMenuOpen = false;
+            }
+        };
+
+        document.addEventListener('click', handleClick, true);
+
+        return {
+            destroy() {
+                document.removeEventListener('click', handleClick, true);
+            }
+        };
+    }
 </script>
 
-<div>
+<div use:clickOutside>
     <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
     <div
         class="relative z-50 lg:hidden"
         role="dialog"
         aria-modal="true"
         class:hidden={!isMobileMenuOpen}
+        id="mobile-menu"
     >
         <!--
         Off-canvas menu backdrop, show/hide based on off-canvas menu state.
@@ -456,6 +480,7 @@
                             aria-labelledby="user-menu-button"
                             tabindex="-1"
                             class:hidden={!isUserMenuOpen}
+                            id="user-menu"
                         >
                             <!-- Active: "bg-gray-50", Not Active: "" -->
                             <!-- <a
@@ -580,6 +605,7 @@
                                         aria-labelledby="menu-0-button"
                                         tabindex="-1"
                                         class:hidden={!isSelectedEmailMenuOpen}
+                                        id="selected-email-menu"
                                     >
                                         <div class="py-1" role="none">
                                             <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
