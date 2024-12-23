@@ -2,10 +2,14 @@
     import { base } from "$app/paths";
     import { onMount } from "svelte";
     import PostalMime from "postal-mime";
+    import loader from "@monaco-editor/loader";
+    import type { Monaco } from "@monaco-editor/loader";
 
-    // const endpoint = "http://localhost:3000";
     const endpoint = "https://test.opentrust.it";
-    
+
+    type EmailViewModeType = "html" | "html-src" | "text" | "raw" | "headers";
+    type PreviewLayouttype = "desktop" | "tablet" | "mobile";
+
     let username = $state("");
     let isMobileMenuOpen = $state(false);
     let isUserMenuOpen = $state(false);
@@ -14,10 +18,9 @@
     let page = $state(1);
     let selectedEmailId: number | null = $state(null);
     let parsedEmail: any = $state(null);
-    let selectedPreviewLayout: "desktop" | "tablet" | "mobile" =
-        $state("desktop");
-    let selectedEmailViewMode: "html" | "text" | "raw" | "headers" =
-        $state("html");
+    let selectedPreviewLayout: PreviewLayouttype = $state("desktop");
+    let selectedEmailViewMode: EmailViewModeType = $state("html");
+    let monaco: Monaco | null = null;
 
     function toggleMobileMenu() {
         isMobileMenuOpen = !isMobileMenuOpen;
@@ -31,12 +34,15 @@
         isSelectedEmailMenuOpen = !isSelectedEmailMenuOpen;
     }
 
-    function setPreviewLayout(layout: "desktop" | "tablet" | "mobile") {
+    function setPreviewLayout(layout: PreviewLayouttype) {
         selectedPreviewLayout = layout;
     }
 
-    function setEmailViewMode(mode: "html" | "text" | "raw" | "headers") {
+    function setEmailViewMode(mode: EmailViewModeType) {
         if (mode === "text" && (!parsedEmail || !parsedEmail.text)) {
+            return;
+        }
+        if ((mode === 'html' || mode === 'html-src') && (!parsedEmail || !parsedEmail.html)) {
             return;
         }
         selectedEmailViewMode = mode;
@@ -141,6 +147,13 @@
         shadow.innerHTML = "";
         let shadowEmailContent: any = document.createElement("div");
 
+        // fallback view mode
+        if ((selectedEmailViewMode === 'html' || selectedEmailViewMode === 'html-src') && !parsedEmail.html) {
+            selectedEmailViewMode = 'text';
+        } else if (selectedEmailViewMode === 'text' && !parsedEmail.text) {
+            selectedEmailViewMode = 'html';
+        }
+
         switch (selectedEmailViewMode) {
             case "html":
                 shadowEmailContent.innerHTML = parsedEmail.html;
@@ -179,6 +192,31 @@
         }
     });
 
+    $effect(() => {
+        if (selectedEmailViewMode === "html-src") {
+            const htmlSrc = document.getElementById("html-src-monaco");
+            loader.init().then((m: Monaco) => {
+                monaco = m;
+
+                const container = document.getElementById('html-src-monaco');
+                if (!container) return;
+
+                monaco.editor.create(container, {
+                    scrollbar: {
+                        alwaysConsumeMouseWheel: false,
+                    },
+                    automaticLayout: true,
+                    scrollBeyondLastLine: false,
+                    wrappingStrategy: 'advanced',
+                    overviewRulerLanes: 0,
+                    value: parsedEmail.html,
+                    language: "html",
+                    readOnly: true
+                })
+            });
+        }
+    });
+
     onMount(async () => {
         const user = localStorage.getItem("user");
         if (!user) {
@@ -210,12 +248,12 @@
             }
         };
 
-        document.addEventListener('click', handleClick, true);
+        document.addEventListener("click", handleClick, true);
 
         return {
             destroy() {
-                document.removeEventListener('click', handleClick, true);
-            }
+                document.removeEventListener("click", handleClick, true);
+            },
         };
     }
 </script>
@@ -654,7 +692,10 @@
                                     class="rounded-md px-3 py-2 text-sm font-medium {selectedEmailViewMode ===
                                     'html'
                                         ? 'bg-indigo-100 text-indigo-700'
-                                        : 'text-gray-500 hover:text-gray-700'}"
+                                        : 'text-gray-500 hover:text-gray-700'} {parsedEmail &&
+                                    parsedEmail.html
+                                        ? ''
+                                        : 'cursor-not-allowed opacity-50'}"
                                 >
                                     <div class="flex items-center gap-1">
                                         <svg
@@ -672,6 +713,34 @@
                                             />
                                         </svg>
                                         Html
+                                    </div>
+                                </button>
+                                <button
+                                    onclick={() => setEmailViewMode("html-src")}
+                                    class="rounded-md px-3 py-2 text-sm font-medium {selectedEmailViewMode ===
+                                    'html-src'
+                                        ? 'bg-indigo-100 text-indigo-700'
+                                        : 'text-gray-500 hover:text-gray-700'} {parsedEmail &&
+                                    parsedEmail.html
+                                        ? ''
+                                        : 'cursor-not-allowed opacity-50'}"
+                                >
+                                    <div class="flex items-center gap-1">
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="size-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"
+                                            />
+                                        </svg>
+                                        Source
                                     </div>
                                 </button>
                                 <button
@@ -950,6 +1019,10 @@
                                 </dl>
                             </div>
                         </div>
+                    {/if}
+
+                    {#if selectedEmailViewMode === "html-src"}
+                        <div id="html-src-monaco" class="h-screen"></div>
                     {/if}
                 {/if}
             </div>
