@@ -654,7 +654,7 @@
                                                 tabindex="-1"
                                                 id="menu-0-item-0"
                                             >
-                                                <span>Edit</span>
+                                                <span>Delete</span>
                                             </a>
                                             <a
                                                 href="#"
@@ -663,17 +663,8 @@
                                                 tabindex="-1"
                                                 id="menu-0-item-1"
                                             >
-                                                <span>Duplicate</span>
+                                                <span>Forward</span>
                                             </a>
-                                            <button
-                                                type="button"
-                                                class="text-gray-700 flex w-full justify-between px-4 py-2 text-sm"
-                                                role="menuitem"
-                                                tabindex="-1"
-                                                id="menu-0-item-2"
-                                            >
-                                                <span>Archive</span>
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -986,8 +977,7 @@
                         </ul>
                     {/if}
                     <div
-                        class="mt-4 border-2 border-gray-200 rounded-lg {selectedPreviewLayout} overflow-auto mx-auto {selectedEmailViewMode ===
-                        'headers'
+                        class="mt-4 border-2 border-gray-200 rounded-lg {selectedPreviewLayout} overflow-auto mx-auto {['headers', 'html-src'].includes(selectedEmailViewMode)
                             ? 'hidden'
                             : ''}"
                         id="shadow-email"
@@ -1022,7 +1012,7 @@
                     {/if}
 
                     {#if selectedEmailViewMode === "html-src"}
-                        <div id="html-src-monaco" class="h-screen"></div>
+                        <div id="html-src-monaco" class="h-screen mt-4 border-2 border-gray-200 rounded-lg"></div>
                     {/if}
                 {/if}
             </div>
