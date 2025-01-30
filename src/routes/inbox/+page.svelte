@@ -42,7 +42,10 @@
         if (mode === "text" && (!parsedEmail || !parsedEmail.text)) {
             return;
         }
-        if ((mode === 'html' || mode === 'html-src') && (!parsedEmail || !parsedEmail.html)) {
+        if (
+            (mode === "html" || mode === "html-src") &&
+            (!parsedEmail || !parsedEmail.html)
+        ) {
             return;
         }
         selectedEmailViewMode = mode;
@@ -148,10 +151,14 @@
         let shadowEmailContent: any = document.createElement("div");
 
         // fallback view mode
-        if ((selectedEmailViewMode === 'html' || selectedEmailViewMode === 'html-src') && !parsedEmail.html) {
-            selectedEmailViewMode = 'text';
-        } else if (selectedEmailViewMode === 'text' && !parsedEmail.text) {
-            selectedEmailViewMode = 'html';
+        if (
+            (selectedEmailViewMode === "html" ||
+                selectedEmailViewMode === "html-src") &&
+            !parsedEmail.html
+        ) {
+            selectedEmailViewMode = "text";
+        } else if (selectedEmailViewMode === "text" && !parsedEmail.text) {
+            selectedEmailViewMode = "html";
         }
 
         switch (selectedEmailViewMode) {
@@ -179,10 +186,29 @@
         shadow.appendChild(shadowEmailContent);
     }
 
+    function sendEmailRead(id: number) {
+        fetch(
+            `${endpoint}/emails/read/${id}?username=${username}&password=${JSON.parse(
+                localStorage.getItem("user")!,
+            ).password}`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    read: true,
+                }),
+            },
+        );
+    }
+
     $effect(() => {
         if (selectedEmailId !== null) {
             const email = emails.get(selectedEmailId);
             if (email) {
+                sendEmailRead(email.id);
+                email.is_read = true;
                 parseEmail(email.content).then((result) => {
                     // console.log(result);
                     parsedEmail = result;
@@ -198,7 +224,7 @@
             loader.init().then((m: Monaco) => {
                 monaco = m;
 
-                const container = document.getElementById('html-src-monaco');
+                const container = document.getElementById("html-src-monaco");
                 if (!container) return;
 
                 monaco.editor.create(container, {
@@ -207,12 +233,12 @@
                     },
                     automaticLayout: true,
                     scrollBeyondLastLine: false,
-                    wrappingStrategy: 'advanced',
+                    wrappingStrategy: "advanced",
                     overviewRulerLanes: 0,
                     value: parsedEmail.html,
                     language: "html",
-                    readOnly: true
-                })
+                    readOnly: true,
+                });
             });
         }
     });
@@ -977,7 +1003,10 @@
                         </ul>
                     {/if}
                     <div
-                        class="mt-4 border-2 border-gray-200 rounded-lg {selectedPreviewLayout} overflow-auto mx-auto {['headers', 'html-src'].includes(selectedEmailViewMode)
+                        class="mt-4 border-2 border-gray-200 rounded-lg {selectedPreviewLayout} overflow-auto mx-auto {[
+                            'headers',
+                            'html-src',
+                        ].includes(selectedEmailViewMode)
                             ? 'hidden'
                             : ''}"
                         id="shadow-email"
@@ -1012,7 +1041,10 @@
                     {/if}
 
                     {#if selectedEmailViewMode === "html-src"}
-                        <div id="html-src-monaco" class="h-screen mt-4 border-2 border-gray-200 rounded-lg"></div>
+                        <div
+                            id="html-src-monaco"
+                            class="h-screen mt-4 border-2 border-gray-200 rounded-lg"
+                        ></div>
                     {/if}
                 {/if}
             </div>
@@ -1030,7 +1062,7 @@
                         class="flex justify-between gap-x-6 py-5 hover:opacity-100 px-4 sm:px-6 lg:px-8 {selectedEmailId ===
                         email.id
                             ? 'bg-gray-200 opacity-100'
-                            : 'opacity-80'}"
+                            : (email.is_read ? 'opacity-80' : 'even:bg-indigo-50 odd:bg-indigo-100')}"
                     >
                         <button
                             class="flex min-w-0 gap-x-4 cursor-pointer"
@@ -1038,7 +1070,9 @@
                         >
                             <div class="flex flex-col items-center">
                                 <img
-                                    class="size-12 flex-none rounded-full bg-gray-50"
+                                    class="size-12 flex-none rounded-full bg-gray-50 {(selectedEmailId === email.id || email.is_read)
+                                        ? (selectedEmailId === email.id ? '' : 'opacity-50')
+                                        : 'border-2 border-indigo-500'}"
                                     src="https://ui-avatars.com/api/?name={email.sender}"
                                     alt=""
                                 />
