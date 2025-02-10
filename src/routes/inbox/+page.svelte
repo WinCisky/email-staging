@@ -21,6 +21,8 @@
     let selectedPreviewLayout: PreviewLayouttype = $state("desktop");
     let selectedEmailViewMode: EmailViewModeType = $state("html");
     let monaco: Monaco | null = null;
+    let infiniteEmailList: any;
+    let isLoading = $state(false);
 
     function toggleMobileMenu() {
         isMobileMenuOpen = !isMobileMenuOpen;
@@ -188,9 +190,9 @@
 
     function sendEmailRead(id: number) {
         fetch(
-            `${endpoint}/emails/read/${id}?username=${username}&password=${JSON.parse(
-                localStorage.getItem("user")!,
-            ).password}`,
+            `${endpoint}/emails/read/${id}?username=${username}&password=${
+                JSON.parse(localStorage.getItem("user")!).password
+            }`,
             {
                 method: "PATCH",
                 headers: {
@@ -201,6 +203,38 @@
                 }),
             },
         );
+    }
+
+    function onScroll() {
+        if (
+            infiniteEmailList.scrollTop + infiniteEmailList.clientHeight >=
+                infiniteEmailList.scrollHeight - 50 &&
+            !isLoading
+        ) {
+            isLoading = true;
+            console.log("loading more emails");
+            page += 1;
+            fetch(
+                `${endpoint}/emails?username=${username}&password=${
+                    JSON.parse(localStorage.getItem("user")!).password
+                }&page=${page}`,
+            ).then(async (response) => {
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.length > 0) {
+                        emails = new Map([
+                            ...emails,
+                            ...data.map((email: any) => [email.id, email]),
+                        ]);
+                    } else {
+                        page -= 1;
+                    }
+                }
+                setTimeout(() => {
+                    isLoading = false;
+                }, 300);
+            });
+        }
     }
 
     $effect(() => {
@@ -243,6 +277,13 @@
         }
     });
 
+    $effect(() => {
+        if (infiniteEmailList) {
+            infiniteEmailList.addEventListener("scroll", onScroll);
+            infiniteEmailList.addEventListener("resize", onScroll);
+        }
+    });
+
     onMount(async () => {
         const user = localStorage.getItem("user");
         if (!user) {
@@ -258,6 +299,7 @@
                 emails = new Map(data.map((email: any) => [email.id, email]));
             }
         }
+        onScroll();
     });
 
     // close menu when clicking outside
@@ -1052,6 +1094,7 @@
     </div>
 
     <aside
+        bind:this={infiniteEmailList}
         class="fixed bottom-0 left-20 top-16 xxl:hidden w-96 overflow-y-auto border-r border-gray-200 xl:block"
     >
         <!-- Secondary column (hidden on smaller screens) -->
@@ -1062,7 +1105,9 @@
                         class="flex justify-between gap-x-6 py-5 hover:opacity-100 px-4 sm:px-6 lg:px-8 {selectedEmailId ===
                         email.id
                             ? 'bg-gray-200 opacity-100'
-                            : (email.is_read ? 'opacity-80' : 'even:bg-indigo-50 odd:bg-indigo-100')}"
+                            : email.is_read
+                              ? 'opacity-80'
+                              : 'even:bg-indigo-50 odd:bg-indigo-100'}"
                     >
                         <button
                             class="flex min-w-0 gap-x-4 cursor-pointer"
@@ -1070,8 +1115,11 @@
                         >
                             <div class="flex flex-col items-center">
                                 <img
-                                    class="size-12 flex-none rounded-full bg-gray-50 {(selectedEmailId === email.id || email.is_read)
-                                        ? (selectedEmailId === email.id ? '' : 'opacity-50')
+                                    class="size-12 flex-none rounded-full bg-gray-50 {selectedEmailId ===
+                                        email.id || email.is_read
+                                        ? selectedEmailId === email.id
+                                            ? ''
+                                            : 'opacity-50'
                                         : 'border-2 border-indigo-500'}"
                                     src="https://ui-avatars.com/api/?name={email.sender}"
                                     alt=""
@@ -1105,6 +1153,37 @@
                     </li>
                 {/each}
             </ul>
+            {#if isLoading}
+                <div
+                    class="sticky bottom-0 left-0 right-0 flex justify-center mt-[-4rem]"
+                >
+                    <svg
+                        class="text-gray-300 animate-spin"
+                        viewBox="0 0 64 64"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="30"
+                        height="30"
+                    >
+                        <path
+                            d="M32 3C35.8083 3 39.5794 3.75011 43.0978 5.20749C46.6163 6.66488 49.8132 8.80101 52.5061 11.4939C55.199 14.1868 57.3351 17.3837 58.7925 20.9022C60.2499 24.4206 61 28.1917 61 32C61 35.8083 60.2499 39.5794 58.7925 43.0978C57.3351 46.6163 55.199 49.8132 52.5061 52.5061C49.8132 55.199 46.6163 57.3351 43.0978 58.7925C39.5794 60.2499 35.8083 61 32 61C28.1917 61 24.4206 60.2499 20.9022 58.7925C17.3837 57.3351 14.1868 55.199 11.4939 52.5061C8.801 49.8132 6.66487 46.6163 5.20749 43.0978C3.7501 39.5794 3 35.8083 3 32C3 28.1917 3.75011 24.4206 5.2075 20.9022C6.66489 17.3837 8.80101 14.1868 11.4939 11.4939C14.1868 8.80099 17.3838 6.66487 20.9022 5.20749C24.4206 3.7501 28.1917 3 32 3L32 3Z"
+                            stroke="currentColor"
+                            stroke-width="5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        ></path>
+                        <path
+                            d="M32 3C36.5778 3 41.0906 4.08374 45.1692 6.16256C49.2477 8.24138 52.7762 11.2562 55.466 14.9605C58.1558 18.6647 59.9304 22.9531 60.6448 27.4748C61.3591 31.9965 60.9928 36.6232 59.5759 40.9762"
+                            stroke="currentColor"
+                            stroke-width="5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="text-violet-500"
+                        >
+                        </path>
+                    </svg>
+                </div>
+            {/if}
         </div>
     </aside>
 </div>
